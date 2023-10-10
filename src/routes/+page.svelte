@@ -78,31 +78,38 @@
 
 	function changeEdit() {
 		edit = !edit;
-		setInterval(() => {
-			if (edit) {
+		if (edit) {
+			setInterval(() => {
 				pageNameInput.focus();
-			}
-		}, 1000);
+			}, 1000);
+		}
 	}
 </script>
 
 <header class="container">
-	{#if edit}
-		<input
-			type="text"
-			class="name-page"
-			name="name-page"
-			placeholder={pageName}
-			bind:value={pageName}
-			bind:this={pageNameInput}
-			on:pointerleave={() => changeEdit()}
-			on:change={() => changeEdit()}
-		/>
-	{:else}
-		<h1 on:click={() => changeEdit()} on:keypress={() => null}>
-			{pageName || 'Calculadora de cédulas'}
-		</h1>
-	{/if}
+	<div class="container">
+		<button
+			class="transparent noprint"
+			title="Editar nome"
+			on:click={() => {
+				changeEdit();
+			}}
+		>
+			<i>{edit ? '💾' : '✏️'}</i>
+		</button>
+		{#if edit}
+			<input
+				type="text"
+				class="name-page"
+				name="name-page"
+				placeholder={pageName}
+				bind:value={pageName}
+				bind:this={pageNameInput}
+			/>
+		{:else}
+			<h1>{pageName || 'Calculadora de cédulas'}</h1>
+		{/if}
+	</div>
 	<div class="container">
 		<h1>{currentDate}</h1>
 		<button
@@ -215,6 +222,11 @@
 
 	header .container {
 		padding: 0px;
+	}
+
+	.transparent {
+		border: none;
+		background-color: transparent;
 	}
 
 	@media print {
