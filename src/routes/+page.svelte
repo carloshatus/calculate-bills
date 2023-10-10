@@ -231,6 +231,9 @@
 	}
 
 	@media print {
+		input {
+			border: none;
+		}
 		.noprint {
 			display: none;
 		}
