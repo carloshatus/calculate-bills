@@ -13,6 +13,8 @@
 
 	let bills: Bill[] = [];
 	reset();
+	let currentDate = '';
+	setInterval(refreshTime, 1000);
 
 	let inputs: HTMLInputElement[] = [];
 
@@ -27,6 +29,10 @@
 		(sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0),
 		0
 	);
+
+	function refreshTime() {
+		currentDate = new Date().toLocaleString('pt-BR');
+	}
 
 	function reset() {
 		bills = [
@@ -68,8 +74,9 @@
 </script>
 
 <header class="container">
-	<h1>Calculadora de cédulas</h1>
-	<div>
+	<input type="text" class="name-page" name="name-page" placeholder="Calculadora de cédulas" />
+	<div class="container">
+		<h1>{currentDate}</h1>
 		<button
 			class="noprint"
 			title="Imprimir"
@@ -90,23 +97,24 @@
 		</button>
 	</div>
 </header>
+<div class="container" />
 {#each bills as bill, i}
 	<div class="container">
-		<label class="value" for="bill-quantity">
+		<label class="value" for={`bill-quantity-${i}`}>
 			<i>{bill.type === BillTypes.COIN ? '🪙' : '💵'}</i>
 			{parseToCurrency(bill.value)}
 		</label>
 		<input
 			type="number"
 			name="bill-quantity"
-			id="bill-quantity"
+			id={`bill-quantity-${i}`}
 			placeholder="0"
 			bind:value={bill.quantity}
 			bind:this={inputs[i]}
 			on:change={() => (bill.total = (bill.quantity || 0) * bill.value)}
 			on:keydown={(e) => goToNext(e, i)}
 		/>
-		<label class="total-label" for="bill-quantity">{parseToCurrency(bill.total)}</label>
+		<label class="total-label" for={`bill-quantity-${i}`}>{parseToCurrency(bill.total)}</label>
 	</div>
 {/each}
 <div class="container total">
@@ -160,15 +168,35 @@
 		margin-bottom: 15px;
 	}
 
-	header h1 {
+	header h1,
+	.name-page {
 		font-family: sans-serif;
 		padding: 10px 0px;
 		font-size: 1.6em;
 	}
 
+	.name-page {
+		border: none;
+		width: 40vw;
+	}
+
+	.name-page::placeholder {
+		color: black;
+		opacity: 1; /* Firefox */
+	}
+
+	.name-page::-ms-input-placeholder {
+		/* Edge 12 -18 */
+		color: black;
+	}
+
 	header button {
 		padding: 10px;
 		margin-left: 10px;
+	}
+
+	header .container {
+		padding: 0px;
 	}
 
 	@media print {
