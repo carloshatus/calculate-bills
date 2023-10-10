@@ -120,15 +120,6 @@
 		>
 			<i>{'📥'}</i>
 		</button>
-		<button
-			class="transparent noprint"
-			title="Limpar"
-			on:click={() => {
-				reset();
-			}}
-		>
-			<i>{'🗑️'}</i>
-		</button>
 	</div>
 </header>
 <div class="container" />
@@ -160,6 +151,15 @@
 </div>
 <div class="container">
 	<p>{currentDate}</p>
+	<button
+		class="transparent noprint"
+		title="Limpar"
+		on:click={() => {
+			reset();
+		}}
+	>
+		<i>{'🗑️'}</i>
+	</button>
 </div>
 
 <style>
