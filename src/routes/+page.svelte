@@ -111,9 +111,8 @@
 		{/if}
 	</div>
 	<div class="container">
-		<h1>{currentDate}</h1>
 		<button
-			class="noprint"
+			class="transparent noprint"
 			title="Imprimir"
 			on:click={() => {
 				window.print();
@@ -122,7 +121,7 @@
 			<i>{'📥'}</i>
 		</button>
 		<button
-			class="noprint"
+			class="transparent noprint"
 			title="Limpar"
 			on:click={() => {
 				reset();
@@ -158,6 +157,9 @@
 	<h2><i>{'💵 + 🪙 #'}</i>Total: {totalQuantity}</h2>
 	<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
 	<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
+</div>
+<div class="container">
+	<p>{currentDate}</p>
 </div>
 
 <style>
@@ -216,8 +218,7 @@
 	}
 
 	header button {
-		padding: 10px;
-		margin-left: 10px;
+		padding: 15px;
 	}
 
 	header .container {
