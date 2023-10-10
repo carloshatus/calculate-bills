@@ -96,6 +96,7 @@
 			bind:value={pageName}
 			bind:this={pageNameInput}
 			on:pointerleave={() => changeEdit()}
+			on:change={() => changeEdit()}
 		/>
 	{:else}
 		<h1 on:click={() => changeEdit()} on:keypress={() => null}>
