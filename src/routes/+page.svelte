@@ -16,7 +16,11 @@
 	let currentDate = '';
 	setInterval(refreshTime, 1000);
 
+	let edit = false;
+	let pageName = '';
+
 	let inputs: HTMLInputElement[] = [];
+	let pageNameInput: HTMLInputElement;
 
 	$: total = bills.reduce((sum, { total }) => (sum += total), 0);
 	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += quantity || 0), 0);
@@ -71,10 +75,33 @@
 			inputs[index - 1].focus();
 		}
 	}
+
+	function changeEdit() {
+		edit = !edit;
+		setInterval(() => {
+			if (edit) {
+				pageNameInput.focus();
+			}
+		}, 1000);
+	}
 </script>
 
 <header class="container">
-	<input type="text" class="name-page" name="name-page" placeholder="Calculadora de cédulas" />
+	{#if edit}
+		<input
+			type="text"
+			class="name-page"
+			name="name-page"
+			placeholder={pageName}
+			bind:value={pageName}
+			bind:this={pageNameInput}
+			on:pointerleave={() => changeEdit()}
+		/>
+	{:else}
+		<h1 on:click={() => changeEdit()} on:keypress={() => null}>
+			{pageName || 'Calculadora de cédulas'}
+		</h1>
+	{/if}
 	<div class="container">
 		<h1>{currentDate}</h1>
 		<button
@@ -108,6 +135,7 @@
 			type="number"
 			name="bill-quantity"
 			id={`bill-quantity-${i}`}
+			class="bill-quantity"
 			placeholder="0"
 			bind:value={bill.quantity}
 			bind:this={inputs[i]}
@@ -144,7 +172,7 @@
 		width: 25vw;
 	}
 
-	input {
+	.bill-quantity {
 		width: 20vw;
 	}
 
@@ -176,18 +204,7 @@
 	}
 
 	.name-page {
-		border: none;
-		width: 40vw;
-	}
-
-	.name-page::placeholder {
-		color: black;
-		opacity: 1; /* Firefox */
-	}
-
-	.name-page::-ms-input-placeholder {
-		/* Edge 12 -18 */
-		color: black;
+		max-width: 80vw;
 	}
 
 	header button {
