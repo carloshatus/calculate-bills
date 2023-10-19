@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+
 	enum BillTypes {
 		BILL = 'bill',
 		COIN = 'coin'
@@ -12,9 +14,9 @@
 	};
 
 	let bills: Bill[] = [];
-	reset();
+	let observations: string[] = [];
+	let observation = '';
 	let currentDate = '';
-	setInterval(refreshTime, 1000);
 
 	let edit = false;
 	let pageName = '';
@@ -22,9 +24,11 @@
 	let inputs: HTMLInputElement[] = [];
 	let pageNameInput: HTMLInputElement;
 
+	start();
+	setInterval(refreshTime, 1000);
+
 	$: total = bills.reduce((sum, { total }) => (sum += total), 0);
 	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += quantity || 0), 0);
-
 	$: totalCoins = bills.reduce(
 		(sum, { type, total }) => (sum += type === BillTypes.COIN ? total : 0),
 		0
@@ -38,7 +42,25 @@
 		currentDate = new Date().toLocaleString('pt-BR');
 	}
 
-	function reset() {
+	function start(): void {
+		if (browser) {
+			const billsFinded = window.sessionStorage.getItem('billsSaved');
+			const observationsFinded = window.sessionStorage.getItem('observationsSaved');
+			if (billsFinded) {
+				bills = JSON.parse(billsFinded);
+			}
+			if (observationsFinded) {
+				observations = JSON.parse(observationsFinded);
+			}
+			window.sessionStorage.setItem('billsSaved', JSON.stringify(bills));
+			window.sessionStorage.setItem('observationsSaved', JSON.stringify(observations));
+		}
+		if (!bills.length) {
+			reset();
+		}
+	}
+
+	function reset(): void {
 		bills = [
 			{ value: 200, quantity: null, total: 0, type: BillTypes.BILL },
 			{ value: 100, quantity: null, total: 0, type: BillTypes.BILL },
@@ -54,16 +76,27 @@
 			{ value: 0.05, quantity: null, total: 0, type: BillTypes.COIN },
 			{ value: 0.01, quantity: null, total: 0, type: BillTypes.COIN }
 		];
+		observations = [];
 	}
 
-	function parseToCurrency(value: number) {
+	function updateBills(): void {
+		bills = bills.map((bill) => {
+			bill.total = (bill.quantity || 0) * bill.value;
+			return bill;
+		});
+		if (browser) {
+			window.sessionStorage.setItem('billsSaved', JSON.stringify(bills));
+		}
+	}
+
+	function parseToCurrency(value: number): string {
 		return value.toLocaleString('pt-BR', {
 			style: 'currency',
 			currency: 'BRL'
 		});
 	}
 
-	function goToNext(e: KeyboardEvent, index: number) {
+	function goToNext(e: KeyboardEvent, index: number): void {
 		const { key } = e;
 		if (['Enter', 'ArrowDown', 'ArrowUp'].includes(key)) {
 			e.preventDefault();
@@ -76,12 +109,40 @@
 		}
 	}
 
-	function changeEdit() {
+	function goToConfirm(e: KeyboardEvent): void {
+		const { key } = e;
+		if (['Enter', 'ArrowDown', 'ArrowUp'].includes(key)) {
+			e.preventDefault();
+		}
+		if (key === 'Enter') {
+			addObs();
+		}
+	}
+
+	function changeEdit(): void {
 		edit = !edit;
 		if (edit) {
 			setInterval(() => {
 				pageNameInput.focus();
 			}, 1000);
+		}
+	}
+
+	function addObs(): void {
+		if (observation) {
+			observations = [...observations, observation];
+			observation = '';
+			if (browser) {
+				window.sessionStorage.setItem('observationsSaved', JSON.stringify(observations));
+			}
+		}
+	}
+
+	function clear(index: number): void {
+		if (index >= 0) {
+			observations.splice(index, 1);
+			observations = observations;
+			window.sessionStorage.setItem('observationsSaved', JSON.stringify(observations));
 		}
 	}
 </script>
@@ -137,7 +198,8 @@
 			placeholder="0"
 			bind:value={bill.quantity}
 			bind:this={inputs[i]}
-			on:change={() => (bill.total = (bill.quantity || 0) * bill.value)}
+			on:keyup={() => updateBills()}
+			on:change={() => updateBills()}
 			on:keydown={(e) => goToNext(e, i)}
 		/>
 		<label class="total-label" for={`bill-quantity-${i}`}>{parseToCurrency(bill.total)}</label>
@@ -149,7 +211,40 @@
 	<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
 	<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
 </div>
+<div class="observations container">
+	{#each observations as observation, i}
+		<div class="side-button container">
+			<button
+				class="transparent noprint"
+				title="Limpar"
+				on:click={() => {
+					clear(i);
+				}}
+			>
+				<i>{'🗑️'}</i>
+			</button>
+			<h2>{`${i + 1}. ${observation}`}</h2>
+		</div>
+	{/each}
+</div>
 <div class="container">
+	<div>
+		<input
+			type="text"
+			name="obs"
+			id="obs"
+			class="noprint observation"
+			placeholder="Observação"
+			bind:value={observation}
+			on:keydown={(e) => goToConfirm(e)}
+		/>
+		<button class="noprint" title="Adicionar" on:click={() => addObs()}>
+			<i>{'➕'}</i>
+		</button>
+	</div>
+</div>
+
+<botton class="container">
 	<p>{currentDate}</p>
 	<button
 		class="transparent noprint"
@@ -160,7 +255,7 @@
 	>
 		<i>{'🗑️'}</i>
 	</button>
-</div>
+</botton>
 
 <style>
 	.container {
@@ -206,6 +301,11 @@
 		margin-bottom: 15px;
 	}
 
+	.observations h2 {
+		font-family: sans-serif;
+		font-size: 1.2em;
+	}
+
 	header h1,
 	.name-page {
 		font-family: sans-serif;
@@ -217,6 +317,7 @@
 		max-width: 80vw;
 	}
 
+	botton button,
 	header button {
 		padding: 15px;
 	}
@@ -228,6 +329,22 @@
 	.transparent {
 		border: none;
 		background-color: transparent;
+	}
+
+	.observation {
+		width: 80vw;
+	}
+
+	.observations {
+		justify-content: flex-start;
+	}
+
+	.observations > div {
+		flex-grow: 1;
+	}
+
+	.side-button {
+		justify-content: flex-start;
 	}
 
 	@media print {
