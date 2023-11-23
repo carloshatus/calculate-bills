@@ -249,7 +249,7 @@
 </div>
 
 <botton class="container">
-	<p>{currentDate}</p>
+	<p class="onlyprint">{currentDate}</p>
 	<button
 		class="transparent noprint"
 		title="Limpar"
@@ -351,12 +351,19 @@
 		justify-content: flex-start;
 	}
 
+	.onlyprint {
+		visibility: hidden;
+	}
+
 	@media print {
 		input {
 			border: none;
 		}
 		.noprint {
 			display: none;
+		}
+		.onlyprint {
+			visibility: visible;
 		}
 		.container {
 			break-after: always;
