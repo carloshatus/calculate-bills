@@ -147,6 +147,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Calculadora de cédulas {currentDate}</title>
+</svelte:head>
+
 <header class="container">
 	<div class="container">
 		<button
