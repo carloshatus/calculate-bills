@@ -148,7 +148,7 @@
 </script>
 
 <svelte:head>
-	<title>{`${pageName} ${currentDate}`}</title>
+	<title>{`${pageName || 'Calculadora de cédulas'} ${currentDate}`}</title>
 </svelte:head>
 
 <header class="container">
