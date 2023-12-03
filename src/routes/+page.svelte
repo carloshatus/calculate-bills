@@ -44,16 +44,16 @@
 
 	function start(): void {
 		if (browser) {
-			const billsFinded = window.sessionStorage.getItem('billsSaved');
-			const observationsFinded = window.sessionStorage.getItem('observationsSaved');
+			const billsFinded = window.localStorage.getItem('billsSaved');
+			const observationsFinded = window.localStorage.getItem('observationsSaved');
 			if (billsFinded) {
 				bills = JSON.parse(billsFinded);
 			}
 			if (observationsFinded) {
 				observations = JSON.parse(observationsFinded);
 			}
-			window.sessionStorage.setItem('billsSaved', JSON.stringify(bills));
-			window.sessionStorage.setItem('observationsSaved', JSON.stringify(observations));
+			window.localStorage.setItem('billsSaved', JSON.stringify(bills));
+			window.localStorage.setItem('observationsSaved', JSON.stringify(observations));
 		}
 		if (!bills.length) {
 			reset();
@@ -85,7 +85,7 @@
 			return bill;
 		});
 		if (browser) {
-			window.sessionStorage.setItem('billsSaved', JSON.stringify(bills));
+			window.localStorage.setItem('billsSaved', JSON.stringify(bills));
 		}
 	}
 
@@ -133,7 +133,7 @@
 			observations = [...observations, observation];
 			observation = '';
 			if (browser) {
-				window.sessionStorage.setItem('observationsSaved', JSON.stringify(observations));
+				window.localStorage.setItem('observationsSaved', JSON.stringify(observations));
 			}
 		}
 	}
@@ -142,7 +142,7 @@
 		if (index >= 0) {
 			observations.splice(index, 1);
 			observations = observations;
-			window.sessionStorage.setItem('observationsSaved', JSON.stringify(observations));
+			window.localStorage.setItem('observationsSaved', JSON.stringify(observations));
 		}
 	}
 </script>
