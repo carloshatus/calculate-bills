@@ -152,11 +152,6 @@
 		font-size: 1.6em;
 	}
 
-	a {
-		text-decoration: none;
-		color: inherit;
-	}
-
 	.container {
 		font-family: sans-serif;
 		font-size: 0.8em;
@@ -183,6 +178,7 @@
 
 	.total {
 		margin-top: 25px;
+		padding-right: 70px;
 	}
 
 	.total > h1 {
@@ -201,27 +197,6 @@
 		margin-bottom: 15px;
 	}
 
-	.observations h2 {
-		font-family: sans-serif;
-		font-size: 1.2em;
-	}
-
-	header h1,
-	.name-page {
-		font-family: sans-serif;
-		padding: 10px 0px;
-		font-size: 1.6em;
-	}
-
-	.name-page {
-		max-width: 80em;
-	}
-
-	botton button,
-	header button {
-		padding: 15px;
-	}
-
 	header .container {
 		padding: 0px;
 	}
@@ -229,22 +204,6 @@
 	.transparent {
 		border: none;
 		background-color: transparent;
-	}
-
-	.observation {
-		width: 80%;
-	}
-
-	.observations {
-		justify-content: flex-start;
-	}
-
-	.observations > div {
-		flex-grow: 1;
-	}
-
-	.side-button {
-		justify-content: flex-start;
 	}
 
 	.onlyprint {

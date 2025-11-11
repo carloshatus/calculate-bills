@@ -300,6 +300,7 @@
 
 	.total {
 		margin-top: 25px;
+		padding-right: 70px;
 	}
 
 	.total > h1 {

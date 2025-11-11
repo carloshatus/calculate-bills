@@ -5,10 +5,7 @@
     <meta charset="utf-8" />
     <title>Redirecting...</title>
     <script>
-        // Get the current path
         const path = window.location.pathname;
-
-        // Redirect to the root and pass the path as a query parameter
         window.location.replace(`/?redirect=${encodeURIComponent(path)}`);
     </script>
 </head>
