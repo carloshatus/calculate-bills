@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { parseToCurrency } from '$lib/utils/currency';
@@ -180,7 +181,7 @@
 				class="transparent noprint"
 				title="Trocar Notas"
 				on:click={() => {
-					goto('/trocar-notas');
+					goto(`${base}/trocar-notas`);
 				}}
 			>
 				<i>{'🔄'}</i>

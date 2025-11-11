@@ -17,7 +17,7 @@ const config = {
 			fallback: 'index.html'
 		}),
 		paths: {
-			base: dev ? '' : process.env.BASE_PATH
+			base: dev ? '/calculate-bills' : process.env.BASE_PATH
 		}
 	}
 };

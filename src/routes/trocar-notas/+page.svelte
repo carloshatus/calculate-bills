@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { parseToCurrency } from '$lib/utils/currency';
@@ -84,9 +85,27 @@
 
 <div class="main-content">
 	<header class="container">
-		<a href="/">
-			<h1>Trocar Notas</h1>
-		</a>
+		<h1>Trocar Notas</h1>
+		<div class="container">
+			<button
+				class="transparent noprint"
+				title="Trocar Notas"
+				on:click={() => {
+					goto(base);
+				}}
+			>
+				<i>{'🔄'}</i>
+			</button>
+			<button
+				class="transparent noprint"
+				title="Imprimir"
+				on:click={() => {
+					window.print();
+				}}
+			>
+				<i>{'📥'}</i>
+			</button>
+		</div>
 	</header>
 
 	<div class="container">
@@ -99,7 +118,7 @@
 			on:change={() => storage.save('amountSaved', amount)}
 			on:keydown={(e) => enterAction(e)}
 		/>
-		<button on:click={exchange}>Trocar</button>
+		<button class="noprint" on:click={exchange}>Trocar</button>
 	</div>
 
 	{#if result.length > 0}
@@ -123,6 +142,9 @@
 		<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
 		<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
 	</div>
+	<botton class="container">
+		<p class="onlyprint">{new Date().toLocaleString('pt-BR')}</p>
+	</botton>
 </div>
 
 <style>
@@ -232,5 +254,24 @@
 	.main-content {
 		max-width: 1200px;
 		margin: 0 auto;
+	}
+
+	@media print {
+		input {
+			border: none;
+		}
+		.noprint {
+			display: none;
+		}
+		.onlyprint {
+			visibility: visible;
+		}
+		.container {
+			break-after: always;
+			/* for firefox */
+			page-break-after: always;
+			/* for webkit */
+			-webkit-column-break-after: always;
+		}
 	}
 </style>
