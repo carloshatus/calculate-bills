@@ -5,6 +5,10 @@
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { parseToCurrency } from '$lib/utils/currency';
+	import html2canvas from 'html2canvas';
+	import { Icon } from 'svelte-icons-pack';
+	import { BsCurrencyExchange } from 'svelte-icons-pack/bs';
+	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
 
 	const storage = new Storage(browser);
 
@@ -12,6 +16,7 @@
 	let observations: string[] = [];
 	let observation = '';
 	let currentDate = '';
+	let mainContent: HTMLElement;
 
 	let edit = false;
 	let pageName = '';
@@ -32,6 +37,28 @@
 		(sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0),
 		0
 	);
+
+	async function share(): Promise<void> {
+		const canvas = await html2canvas(mainContent);
+		canvas.toBlob(async (blob) => {
+			if (!blob) {
+				return;
+			}
+			if (navigator.share) {
+				const file = new File([blob], 'calculadora-de-cedulas.png', { type: 'image/png' });
+				await navigator.share({
+					files: [file],
+					title: 'Calculadora de Cédulas',
+					text: 'Confira o cálculo'
+				});
+			} else {
+				const a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = 'calculadora-de-cedulas.png';
+				a.click();
+			}
+		});
+	}
 
 	function refreshTime() {
 		currentDate = new Date().toLocaleString('pt-BR');
@@ -151,7 +178,7 @@
 	<title>{`${pageName || 'Calculadora de cédulas'} ${currentDate}`}</title>
 </svelte:head>
 
-<div class="main-content">
+<div class="main-content" bind:this={mainContent}>
 	<header class="container">
 		<div class="container">
 			<button
@@ -184,20 +211,19 @@
 					goto(`${base}/trocar-notas`);
 				}}
 			>
-				<i>{'🔄'}</i>
+				<Icon src={BsCurrencyExchange} />
 			</button>
 			<button
 				class="transparent noprint"
-				title="Imprimir"
+				title="Compartilhar"
 				on:click={() => {
-					window.print();
+					share();
 				}}
 			>
-				<i>{'📥'}</i>
+				<Icon src={BiSolidShareAlt} />
 			</button>
 		</div>
 	</header>
-	<div class="container" />
 	{#each bills as bill, i}
 		<div class="container">
 			<label class="value" for={`bill-quantity-${i}`}>
@@ -256,7 +282,6 @@
 			<i>{'➕'}</i>
 		</button>
 	</div>
-
 	<botton class="container">
 		<p class="onlyprint">{currentDate}</p>
 		<button
@@ -270,126 +295,3 @@
 		</button>
 	</botton>
 </div>
-
-<style>
-	.container {
-		font-family: sans-serif;
-		font-size: 0.8em;
-		display: flex;
-		flex-direction: row;
-		flex-flow: wrap;
-		justify-content: space-between;
-		align-content: space-between;
-		padding: 10px 50px;
-	}
-
-	.value {
-		width: 30%;
-		max-width: 100px;
-		color: darkgreen;
-	}
-
-	.total-label {
-		width: 25%;
-	}
-
-	.bill-quantity {
-		min-width: 40%;
-		width: auto;
-	}
-
-	.total {
-		margin-top: 25px;
-		padding-right: 70px;
-	}
-
-	.total > h1 {
-		font-family: sans-serif;
-		font-size: 1.6em;
-		margin-bottom: 15px;
-	}
-
-	.total > h1 > i {
-		font-size: 0.7em;
-	}
-
-	.total > h2 {
-		font-family: sans-serif;
-		font-size: 1.2em;
-		margin-bottom: 15px;
-	}
-
-	.observations h2 {
-		font-family: sans-serif;
-		font-size: 1.2em;
-	}
-
-	header h1,
-	.name-page {
-		font-family: sans-serif;
-		padding: 10px 0px;
-		font-size: 1.6em;
-	}
-
-	.name-page {
-		max-width: 80em;
-	}
-
-	botton button,
-	header button {
-		padding: 15px;
-	}
-
-	header .container {
-		padding: 0px;
-	}
-
-	.transparent {
-		border: none;
-		background-color: transparent;
-	}
-
-	.observation {
-		width: 80%;
-	}
-
-	.observations {
-		justify-content: flex-start;
-	}
-
-	.observations > div {
-		flex-grow: 1;
-	}
-
-	.side-button {
-		justify-content: flex-start;
-	}
-
-	.onlyprint {
-		visibility: hidden;
-	}
-
-	.main-content {
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	@media print {
-		input {
-			border: none;
-		}
-		.noprint {
-			display: none;
-		}
-		.onlyprint {
-			visibility: visible;
-		}
-		.container {
-			break-after: always;
-			/* for firefox */
-			page-break-after: always;
-			/* for webkit */
-			-webkit-column-break-after: always;
-		}
-	}
-</style>

@@ -5,9 +5,11 @@
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { parseToCurrency } from '$lib/utils/currency';
+	import html2canvas from 'html2canvas';
 
 	const storage = new Storage(browser);
 
+	let mainContent: HTMLElement;
 	let availableBills: Bill[] = storage.get<Bill[]>('billsSaved') || [];
 	let amount: number | null = storage.get<number>('amountSaved') || null;
 	let result: Bill[] = [];
@@ -81,9 +83,31 @@
 			exchange();
 		}
 	}
+
+	async function share(): Promise<void> {
+		const canvas = await html2canvas(mainContent);
+		canvas.toBlob(async (blob) => {
+			if (!blob) {
+				return;
+			}
+			if (navigator.share) {
+				const file = new File([blob], 'calculadora-de-cedulas.png', { type: 'image/png' });
+				await navigator.share({
+					files: [file],
+					title: 'Calculadora de Cédulas',
+					text: 'Confira o cálculo'
+				});
+			} else {
+				const a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = 'calculadora-de-cedulas.png';
+				a.click();
+			}
+		});
+	}
 </script>
 
-<div class="main-content">
+<div class="main-content" bind:this={mainContent}>
 	<header class="container">
 		<h1>Trocar Notas</h1>
 		<div class="container">
@@ -98,12 +122,12 @@
 			</button>
 			<button
 				class="transparent noprint"
-				title="Imprimir"
+				title="Compartilhar"
 				on:click={() => {
-					window.print();
+					share();
 				}}
 			>
-				<i>{'📥'}</i>
+				<i>{'🔗'}</i>
 			</button>
 		</div>
 	</header>
@@ -146,91 +170,3 @@
 		<p class="onlyprint">{new Date().toLocaleString('pt-BR')}</p>
 	</botton>
 </div>
-
-<style>
-	h1 {
-		font-size: 1.6em;
-	}
-
-	.container {
-		font-family: sans-serif;
-		font-size: 0.8em;
-		display: flex;
-		flex-direction: row;
-		flex-flow: wrap;
-		justify-content: space-between;
-		align-content: space-between;
-		padding: 10px 50px;
-	}
-
-	.value {
-		width: 30%;
-		max-width: 100px;
-	}
-
-	.total-label {
-		width: 25%;
-	}
-
-	.bill-quantity {
-		width: 25%;
-	}
-
-	.total {
-		margin-top: 25px;
-		padding-right: 70px;
-	}
-
-	.total > h1 {
-		font-family: sans-serif;
-		font-size: 1.6em;
-		margin-bottom: 15px;
-	}
-
-	.total > h1 > i {
-		font-size: 0.7em;
-	}
-
-	.total > h2 {
-		font-family: sans-serif;
-		font-size: 1.2em;
-		margin-bottom: 15px;
-	}
-
-	header .container {
-		padding: 0px;
-	}
-
-	.transparent {
-		border: none;
-		background-color: transparent;
-	}
-
-	.onlyprint {
-		visibility: hidden;
-	}
-
-	.main-content {
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	@media print {
-		input {
-			border: none;
-		}
-		.noprint {
-			display: none;
-		}
-		.onlyprint {
-			visibility: visible;
-		}
-		.container {
-			break-after: always;
-			/* for firefox */
-			page-break-after: always;
-			/* for webkit */
-			-webkit-column-break-after: always;
-		}
-	}
-</style>
