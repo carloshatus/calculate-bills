@@ -77,6 +77,7 @@
 			{ value: 0.01, quantity: null, total: 0, type: BillTypes.COIN }
 		];
 		observations = [];
+		updateBills();
 	}
 
 	function getValueExpr(expr: number | null | string): number {
@@ -90,7 +91,7 @@
 
 	function updateBills(): void {
 		bills = bills.map((bill) => {
-			bill.quantity = String(bill.quantity).replaceAll(/[^0-9\+\-\*\/]/g, '')
+			bill.quantity = String(bill.quantity).replaceAll(/[^0-9\+\-\*\/]/g, '');
 			const value = getValueExpr(bill.quantity);
 			const quantity = Number(value);
 			if (!isNaN(quantity)) {
@@ -165,116 +166,118 @@
 	<title>{`${pageName || 'Calculadora de cédulas'} ${currentDate}`}</title>
 </svelte:head>
 
-<header class="container">
-	<div class="container">
-		<button
-			class="transparent noprint"
-			title="Editar nome"
-			on:click={() => {
-				changeEdit();
-			}}
-		>
-			<i>{edit ? '💾' : '✏️'}</i>
-		</button>
-		{#if edit}
-			<input
-				type="text"
-				class="name-page"
-				name="name-page"
-				placeholder={pageName}
-				bind:value={pageName}
-				bind:this={pageNameInput}
-			/>
-		{:else}
-			<h1>{pageName || 'Calculadora de cédulas'}</h1>
-		{/if}
-	</div>
-	<div class="container">
-		<button
-			class="transparent noprint"
-			title="Imprimir"
-			on:click={() => {
-				window.print();
-			}}
-		>
-			<i>{'📥'}</i>
-		</button>
-	</div>
-</header>
-<div class="container" />
-{#each bills as bill, i}
-	<div class="container">
-		<label class="value" for={`bill-quantity-${i}`}>
-			<i>{bill.type === BillTypes.COIN ? '🪙' : '💵'}</i>
-			{parseToCurrency(bill.value)}
-		</label>
-		<input
-			type="text"
-			inputmode="numeric"
-			name="bill-quantity"
-			id={`bill-quantity-${i}`}
-			class="bill-quantity"
-			placeholder="0"
-			bind:value={bill.quantity}
-			bind:this={inputs[i]}
-			on:keyup={() => updateBills()}
-			on:change={() => updateBills()}
-			on:keydown={(e) => goToNext(e, i)}
-		/>
-		<label class="total-label" for={`bill-quantity-${i}`}>{parseToCurrency(bill.total)}</label>
-	</div>
-{/each}
-<div class="container total">
-	<h1><i>{'💵 + 🪙'}</i>Total: {parseToCurrency(total)}</h1>
-	<h2><i>{'💵 + 🪙 #'}</i>Total: {totalQuantity}</h2>
-	<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
-	<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
-</div>
-<div class="observations container">
-	{#each observations as observation, i}
-		<div class="side-button container">
+<div class="main-content">
+	<header class="container">
+		<div class="container">
 			<button
 				class="transparent noprint"
-				title="Limpar"
+				title="Editar nome"
 				on:click={() => {
-					clear(i);
+					changeEdit();
 				}}
 			>
-				<i>{'🗑️'}</i>
+				<i>{edit ? '💾' : '✏️'}</i>
 			</button>
-			<h2>{`${i + 1}. ${observation}`}</h2>
+			{#if edit}
+				<input
+					type="text"
+					class="name-page"
+					name="name-page"
+					placeholder={pageName}
+					bind:value={pageName}
+					bind:this={pageNameInput}
+				/>
+			{:else}
+				<h1>{pageName || 'Calculadora de cédulas'}</h1>
+			{/if}
+		</div>
+		<div class="container">
+			<button
+				class="transparent noprint"
+				title="Imprimir"
+				on:click={() => {
+					window.print();
+				}}
+			>
+				<i>{'📥'}</i>
+			</button>
+		</div>
+	</header>
+	<div class="container" />
+	{#each bills as bill, i}
+		<div class="container">
+			<label class="value" for={`bill-quantity-${i}`}>
+				<i>{bill.type === BillTypes.COIN ? '🪙' : '💵'}</i>
+				{parseToCurrency(bill.value)}
+			</label>
+			<input
+				type="text"
+				inputmode="numeric"
+				name="bill-quantity"
+				id={`bill-quantity-${i}`}
+				class="bill-quantity"
+				placeholder="0"
+				bind:value={bill.quantity}
+				bind:this={inputs[i]}
+				on:keyup={() => updateBills()}
+				on:change={() => updateBills()}
+				on:keydown={(e) => goToNext(e, i)}
+			/>
+			<label class="total-label" for={`bill-quantity-${i}`}>{parseToCurrency(bill.total)}</label>
 		</div>
 	{/each}
-</div>
-<div class="container">
-	<div>
-		<input
-			type="text"
-			name="obs"
-			id="obs"
-			class="noprint observation"
-			placeholder="Observação"
-			bind:value={observation}
-			on:keydown={(e) => goToConfirm(e)}
-		/>
-		<button class="noprint" title="Adicionar" on:click={() => addObs()}>
-			<i>{'➕'}</i>
-		</button>
+	<div class="container total">
+		<h1><i>{'💵 + 🪙'}</i>Total: {parseToCurrency(total)}</h1>
+		<h2><i>{'💵 + 🪙 #'}</i>Total: {totalQuantity}</h2>
+		<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
+		<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
 	</div>
-</div>
+	<div class="observations container">
+		{#each observations as observation, i}
+			<div class="side-button container">
+				<button
+					class="transparent noprint"
+					title="Limpar"
+					on:click={() => {
+						clear(i);
+					}}
+				>
+					<i>{'🗑️'}</i>
+				</button>
+				<h2>{`${i + 1}. ${observation}`}</h2>
+			</div>
+		{/each}
+	</div>
+	<div class="container">
+		<div>
+			<input
+				type="text"
+				name="obs"
+				id="obs"
+				class="noprint observation"
+				placeholder="Observação"
+				bind:value={observation}
+				on:keydown={(e) => goToConfirm(e)}
+			/>
+			<button class="noprint" title="Adicionar" on:click={() => addObs()}>
+				<i>{'➕'}</i>
+			</button>
+		</div>
+	</div>
 
-<botton class="container">
-	<p class="onlyprint">{currentDate}</p>
-	<button
-		class="transparent noprint"
-		title="Limpar"
-		on:click={() => {
-			reset();
-		}}
-	>
-		<i>{'🗑️'}</i>
-	</button>
-</botton>
+	<botton class="container">
+		<p class="onlyprint">{currentDate}</p>
+		<button
+			class="transparent noprint"
+			title="Limpar"
+			on:click={() => {
+				reset();
+			}}
+		>
+			<i>{'🗑️'}</i>
+		</button>
+	</botton>
+</div>
 
 <style>
 	.container {
@@ -289,15 +292,15 @@
 	}
 
 	.value {
-		width: 20vw;
+		width: 15em;
 	}
 
 	.total-label {
-		width: 25vw;
+		width: 25em;
 	}
 
 	.bill-quantity {
-		width: 20vw;
+		width: 40em;
 	}
 
 	.total {
@@ -333,7 +336,7 @@
 	}
 
 	.name-page {
-		max-width: 80vw;
+		max-width: 80em;
 	}
 
 	botton button,
@@ -351,7 +354,7 @@
 	}
 
 	.observation {
-		width: 80vw;
+		width: 80em;
 	}
 
 	.observations {
@@ -368,6 +371,11 @@
 
 	.onlyprint {
 		visibility: hidden;
+	}
+
+	.main-content {
+		max-width: 1200px;
+		margin: 0 auto;
 	}
 
 	@media print {
