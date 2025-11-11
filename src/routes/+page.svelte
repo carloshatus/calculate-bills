@@ -249,20 +249,18 @@
 		{/each}
 	</div>
 	<div class="container">
-		<div>
-			<input
-				type="text"
-				name="obs"
-				id="obs"
-				class="noprint observation"
-				placeholder="Observação"
-				bind:value={observation}
-				on:keydown={(e) => goToConfirm(e)}
-			/>
-			<button class="noprint" title="Adicionar" on:click={() => addObs()}>
-				<i>{'➕'}</i>
-			</button>
-		</div>
+		<input
+			type="text"
+			name="obs"
+			id="obs"
+			class="noprint observation"
+			placeholder="Observação"
+			bind:value={observation}
+			on:keydown={(e) => goToConfirm(e)}
+		/>
+		<button class="noprint" title="Adicionar" on:click={() => addObs()}>
+			<i>{'➕'}</i>
+		</button>
 	</div>
 
 	<botton class="container">
@@ -288,19 +286,21 @@
 		flex-flow: wrap;
 		justify-content: space-between;
 		align-content: space-between;
-		padding: 10px;
+		padding: 10px 50px;
 	}
 
 	.value {
-		width: 15em;
+		width: 25%;
+		max-width: 100px;
 	}
 
 	.total-label {
-		width: 25em;
+		width: 25%;
 	}
 
 	.bill-quantity {
-		width: 40em;
+		min-width: 40%;
+		width: auto;
 	}
 
 	.total {
@@ -354,7 +354,7 @@
 	}
 
 	.observation {
-		width: 80em;
+		width: 80%;
 	}
 
 	.observations {
