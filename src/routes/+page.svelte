@@ -1,17 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import Storage from '$lib/services/storageService';
+	import { type Bill, BillTypes } from '$lib/types/bill';
+	import { parseToCurrency } from '$lib/utils/currency';
 
-	enum BillTypes {
-		BILL = 'bill',
-		COIN = 'coin'
-	}
-
-	type Bill = {
-		value: number;
-		quantity: number | null | string;
-		total: number;
-		type: BillTypes;
-	};
+	const storage = new Storage(browser);
 
 	let bills: Bill[] = [];
 	let observations: string[] = [];
@@ -43,18 +37,16 @@
 	}
 
 	function start(): void {
-		if (browser) {
-			const billsFinded = window.localStorage.getItem('billsSaved');
-			const observationsFinded = window.localStorage.getItem('observationsSaved');
-			if (billsFinded) {
-				bills = JSON.parse(billsFinded);
-			}
-			if (observationsFinded) {
-				observations = JSON.parse(observationsFinded);
-			}
-			window.localStorage.setItem('billsSaved', JSON.stringify(bills));
-			window.localStorage.setItem('observationsSaved', JSON.stringify(observations));
+		const billsFound = storage.get<Bill[]>('billsSaved');
+		const observationsFound = storage.get<string[]>('observationsSaved');
+		if (billsFound) {
+			bills = billsFound;
 		}
+		if (observationsFound) {
+			observations = observationsFound;
+		}
+		storage.save('bills', bills);
+		storage.save('observations', observations);
 		if (!bills.length) {
 			reset();
 		}
@@ -77,7 +69,10 @@
 			{ value: 0.01, quantity: null, total: 0, type: BillTypes.COIN }
 		];
 		observations = [];
-		updateBills();
+		storage.save('billsSaved', bills);
+		storage.save('observationsSaved', observations);
+
+		storage.delete('amountSaved');
 	}
 
 	function getValueExpr(expr: number | null | string): number {
@@ -99,16 +94,7 @@
 			}
 			return bill;
 		});
-		if (browser) {
-			window.localStorage.setItem('billsSaved', JSON.stringify(bills));
-		}
-	}
-
-	function parseToCurrency(value: number): string {
-		return value.toLocaleString('pt-BR', {
-			style: 'currency',
-			currency: 'BRL'
-		});
+		storage.save('billsSaved', bills);
 	}
 
 	function goToNext(e: KeyboardEvent, index: number): void {
@@ -137,9 +123,9 @@
 	function changeEdit(): void {
 		edit = !edit;
 		if (edit) {
-			setInterval(() => {
+			setTimeout(() => {
 				pageNameInput.focus();
-			}, 1000);
+			}, 100);
 		}
 	}
 
@@ -147,9 +133,7 @@
 		if (observation) {
 			observations = [...observations, observation];
 			observation = '';
-			if (browser) {
-				window.localStorage.setItem('observationsSaved', JSON.stringify(observations));
-			}
+			storage.save('observationsSaved', observations);
 		}
 	}
 
@@ -157,7 +141,7 @@
 		if (index >= 0) {
 			observations.splice(index, 1);
 			observations = observations;
-			window.localStorage.setItem('observationsSaved', JSON.stringify(observations));
+			storage.save('observationsSaved', observations);
 		}
 	}
 </script>
@@ -194,6 +178,15 @@
 		<div class="container">
 			<button
 				class="transparent noprint"
+				title="Trocar Notas"
+				on:click={() => {
+					goto('/trocar-notas');
+				}}
+			>
+				<i>{'🔄'}</i>
+			</button>
+			<button
+				class="transparent noprint"
 				title="Imprimir"
 				on:click={() => {
 					window.print();
@@ -228,9 +221,9 @@
 	{/each}
 	<div class="container total">
 		<h1><i>{'💵 + 🪙'}</i>Total: {parseToCurrency(total)}</h1>
-		<h2><i>{'💵 + 🪙 #'}</i>Total: {totalQuantity}</h2>
 		<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
 		<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
+		<h2><i>{'💵 + 🪙 #'}</i>Total: {totalQuantity}</h2>
 	</div>
 	<div class="observations container">
 		{#each observations as observation, i}
@@ -290,8 +283,9 @@
 	}
 
 	.value {
-		width: 25%;
+		width: 30%;
 		max-width: 100px;
+		color: darkgreen;
 	}
 
 	.total-label {
