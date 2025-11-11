@@ -8,7 +8,7 @@
 
 	type Bill = {
 		value: number;
-		quantity: number | null;
+		quantity: number | null | string;
 		total: number;
 		type: BillTypes;
 	};
@@ -28,7 +28,7 @@
 	setInterval(refreshTime, 1000);
 
 	$: total = bills.reduce((sum, { total }) => (sum += total), 0);
-	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += quantity || 0), 0);
+	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += Number(quantity) || 0), 0);
 	$: totalCoins = bills.reduce(
 		(sum, { type, total }) => (sum += type === BillTypes.COIN ? total : 0),
 		0
@@ -79,9 +79,23 @@
 		observations = [];
 	}
 
+	function getValueExpr(expr: number | null | string): number {
+		try {
+			const value = eval(String(expr));
+			return value ? Number(value) : 0;
+		} catch (e) {
+			return 0;
+		}
+	}
+
 	function updateBills(): void {
 		bills = bills.map((bill) => {
-			bill.total = (bill.quantity || 0) * bill.value;
+			bill.quantity = String(bill.quantity).replaceAll(/[^0-9\+\-\*\/]/g, '')
+			const value = getValueExpr(bill.quantity);
+			const quantity = Number(value);
+			if (!isNaN(quantity)) {
+				bill.total = quantity * bill.value;
+			}
 			return bill;
 		});
 		if (browser) {
@@ -195,7 +209,8 @@
 			{parseToCurrency(bill.value)}
 		</label>
 		<input
-			type="number"
+			type="text"
+			inputmode="numeric"
 			name="bill-quantity"
 			id={`bill-quantity-${i}`}
 			class="bill-quantity"
