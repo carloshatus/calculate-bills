@@ -7,10 +7,21 @@
 	import { parseToCurrency } from '$lib/utils/currency';
 	import html2canvas from 'html2canvas';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsCurrencyExchange } from 'svelte-icons-pack/bs';
-	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
+	import {
+		BsCurrencyExchange,
+		BsPlus,
+		BsPlusCircleFill,
+		BsPencil,
+		BsSave
+	} from 'svelte-icons-pack/bs';
+	import { BiSolidShareAlt, BiCoin } from 'svelte-icons-pack/bi';
+	import { FaSolidMoneyBill1Wave } from 'svelte-icons-pack/fa';
+	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
 
 	const storage = new Storage(browser);
+
+	const coinColor = 'darkgoldenrod';
+	const billColor = 'darkgreen';
 
 	let bills: Bill[] = [];
 	let observations: string[] = [];
@@ -188,7 +199,7 @@
 					changeEdit();
 				}}
 			>
-				<i>{edit ? '💾' : '✏️'}</i>
+				<Icon src={edit ? BsSave : BsPencil} />
 			</button>
 			{#if edit}
 				<input
@@ -220,14 +231,14 @@
 					share();
 				}}
 			>
-				<Icon src={BiSolidShareAlt} />
+				<Icon src={BiSolidShareAlt} color="darkblue" />
 			</button>
 		</div>
 	</header>
 	{#each bills as bill, i}
 		<div class="container">
-			<label class="value" for={`bill-quantity-${i}`}>
-				<i>{bill.type === BillTypes.COIN ? '🪙' : '💵'}</i>
+			<label class={`value ${bill.type}`} for={`bill-quantity-${i}`}>
+				<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
 				{parseToCurrency(bill.value)}
 			</label>
 			<input
@@ -247,10 +258,23 @@
 		</div>
 	{/each}
 	<div class="container total">
-		<h1><i>{'💵 + 🪙'}</i>Total: {parseToCurrency(total)}</h1>
-		<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
-		<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
-		<h2><i>{'💵 + 🪙 #'}</i>Total: {totalQuantity}</h2>
+		<h1>
+			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
+				src={BiCoin}
+				color={coinColor}
+			/> Total: {parseToCurrency(total)}
+		</h1>
+		<h2 class="bill">
+			<Icon src={FaSolidMoneyBill1Wave} /> Cédulas: {parseToCurrency(totalBills)}
+		</h2>
+		<h2 class="coin"><Icon src={BiCoin} /> Moedas: {parseToCurrency(totalCoins)}</h2>
+		<h2>
+			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
+				src={BiCoin}
+				color={coinColor}
+			/> Quantidade Total:
+			{totalQuantity}
+		</h2>
 	</div>
 	<div class="observations container">
 		{#each observations as observation, i}
@@ -262,7 +286,7 @@
 						clear(i);
 					}}
 				>
-					<i>{'🗑️'}</i>
+					<Icon src={AiOutlineDelete} />
 				</button>
 				<h2>{`${i + 1}. ${observation}`}</h2>
 			</div>
@@ -278,8 +302,8 @@
 			bind:value={observation}
 			on:keydown={(e) => goToConfirm(e)}
 		/>
-		<button class="noprint" title="Adicionar" on:click={() => addObs()}>
-			<i>{'➕'}</i>
+		<button class="transparent noprint" title="Adicionar" on:click={() => addObs()}>
+			<Icon src={BsPlusCircleFill} />
 		</button>
 	</div>
 	<botton class="container">
@@ -291,7 +315,7 @@
 				reset();
 			}}
 		>
-			<i>{'🗑️'}</i>
+			<Icon src={AiOutlineClear} color="darkred" />
 		</button>
 	</botton>
 </div>

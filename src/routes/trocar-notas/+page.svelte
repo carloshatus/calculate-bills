@@ -6,8 +6,15 @@
 	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { parseToCurrency } from '$lib/utils/currency';
 	import html2canvas from 'html2canvas';
+	import { Icon } from 'svelte-icons-pack';
+	import { BsCurrencyExchange, BsPlus } from 'svelte-icons-pack/bs';
+	import { BiSolidShareAlt, BiCoin } from 'svelte-icons-pack/bi';
+	import { FaSolidMoneyBill1Wave } from 'svelte-icons-pack/fa';
 
 	const storage = new Storage(browser);
+
+	const coinColor = 'darkgoldenrod';
+	const billColor = 'darkgreen';
 
 	let mainContent: HTMLElement;
 	let availableBills: Bill[] = storage.get<Bill[]>('billsSaved') || [];
@@ -118,7 +125,7 @@
 					goto(base);
 				}}
 			>
-				<i>{'🔄'}</i>
+				<Icon src={BsCurrencyExchange} />
 			</button>
 			<button
 				class="transparent noprint"
@@ -127,7 +134,7 @@
 					share();
 				}}
 			>
-				<i>{'🔗'}</i>
+				<Icon src={BiSolidShareAlt} color="darkblue" />
 			</button>
 		</div>
 	</header>
@@ -152,7 +159,7 @@
 		{#each result as bill, i}
 			<div class="container">
 				<p class="value">
-					<i>{bill.type === BillTypes.COIN ? '🪙' : '💵'}</i>
+					<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
 					{parseToCurrency(bill.value)}
 				</p>
 				<i class="bill-quantity">{bill.quantity}</i>
@@ -161,10 +168,20 @@
 		{/each}
 	{/if}
 	<div class="container total">
-		<h1><i>{'💵 + 🪙'}</i>Total: {parseToCurrency(total)}</h1>
-		<h1><i>{'💵 + 🪙'}</i>Sobra: {parseToCurrency(rest)}</h1>
-		<h2><i>{'💵'}</i>Cédulas: {parseToCurrency(totalBills)}</h2>
-		<h2><i>{'🪙'}</i>Moedas: {parseToCurrency(totalCoins)}</h2>
+		<h1>
+			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
+				src={BiCoin}
+				color={coinColor}
+			/>Total: {parseToCurrency(total)}
+		</h1>
+		<h1>
+			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
+				src={BiCoin}
+				color={coinColor}
+			/>Sobra: {parseToCurrency(rest)}
+		</h1>
+		<h2 class="bill"><Icon src={FaSolidMoneyBill1Wave} />Cédulas: {parseToCurrency(totalBills)}</h2>
+		<h2 class="coin"><Icon src={BiCoin} />Moedas: {parseToCurrency(totalCoins)}</h2>
 	</div>
 	<botton class="container">
 		<p class="onlyprint">{new Date().toLocaleString('pt-BR')}</p>

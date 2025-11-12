@@ -1,126 +1,138 @@
+.container {
+	font-family: sans-serif;
+	font-size: 0.8em;
+	display: flex;
+	flex-direction: row;
+	flex-flow: wrap;
+	justify-content: space-between;
+	align-content: space-between;
+	padding: 10px 50px;
+}
 
-	.container {
-		font-family: sans-serif;
-		font-size: 0.8em;
-		display: flex;
-		flex-direction: row;
-		flex-flow: wrap;
-		justify-content: space-between;
-		align-content: space-between;
-		padding: 10px 50px;
-	}
+.value {
+	width: 30%;
+	max-width: 100px;
+}
 
-	.value {
-		width: 30%;
-		max-width: 100px;
-		color: darkgreen;
-	}
+.coin {
+	color: darkgoldenrod;
+}
 
-	.total-label {
-		width: 25%;
-	}
+.bill {
+	color: darkgreen;
+}
 
-	.bill-quantity {
-		min-width: 40%;
-		width: auto;
-	}
+.total-label {
+	width: 25%;
+}
 
-	.total {
-		margin-top: 25px;
-		padding-right: 70px;
-	}
+.bill-quantity {
+	min-width: 40%;
+	width: auto;
+}
 
-	.total > h1 {
-		font-family: sans-serif;
-		font-size: 1.6em;
-		margin-bottom: 15px;
-	}
+.total {
+	margin-top: 25px;
+	padding-right: 70px;
+}
 
-	.total > h1 > i {
-		font-size: 0.7em;
-	}
+.total > h1 {
+	font-family: sans-serif;
+	font-size: 1.6em;
+	margin-bottom: 15px;
+}
 
-	.total > h2 {
-		font-family: sans-serif;
-		font-size: 1.2em;
-		margin-bottom: 15px;
-	}
+.total > h1 > i {
+	font-size: 0.7em;
+}
 
-	.observations h2 {
-		font-family: sans-serif;
-		font-size: 1.2em;
-	}
+.total > h2 {
+	font-family: sans-serif;
+	font-size: 1.2em;
+	margin-bottom: 15px;
+}
 
-	header {
-		margin-bottom: 10px;
-	}
+.observations h2 {
+	font-family: sans-serif;
+	font-size: 1.2em;
+}
 
-	header h1,
-	.name-page {
-		font-family: sans-serif;
-		padding: 10px 0px;
-		font-size: 1.6em;
-	}
+header {
+	margin-bottom: 10px;
+}
 
-	.name-page {
-		max-width: 80em;
-	}
+header h1,
+.name-page {
+	font-family: sans-serif;
+	padding: 10px 0px;
+	font-size: 1.6em;
+}
 
-	botton button,
-	header button {
-		padding: 5px;
-		font-size: 2em;
-	}
+.name-page {
+	max-width: 80em;
+}
 
-	header .container {
-		padding: 0px;
-	}
+botton button,
+header button {
+	font-size: 1.8em;
+}
 
-	.transparent {
+header .container {
+	padding: 0px;
+}
+
+.transparent {
+	border: none;
+	background-color: transparent;
+}
+
+.observation {
+	width: 80%;
+}
+
+.observations {
+	justify-content: flex-start;
+}
+
+.observations > div {
+	flex-grow: 1;
+}
+
+.side-button {
+	justify-content: flex-start;
+}
+
+.onlyprint {
+	visibility: hidden;
+}
+
+.main-content {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+svg {
+	padding: 2px;
+}
+
+@media print {
+	input {
 		border: none;
-		background-color: transparent;
 	}
 
-	.observation {
-		width: 80%;
-	}
-
-	.observations {
-		justify-content: flex-start;
-	}
-
-	.observations > div {
-		flex-grow: 1;
-	}
-
-	.side-button {
-		justify-content: flex-start;
+	.noprint {
+		display: none;
 	}
 
 	.onlyprint {
-		visibility: hidden;
+		visibility: visible;
 	}
 
-	.main-content {
-		max-width: 1200px;
-		margin: 0 auto;
+	.container {
+		break-after: always;
+		/* for firefox */
+		page-break-after: always;
+		/* for webkit */
+		-webkit-column-break-after: always;
 	}
-
-	@media print {
-		input {
-			border: none;
-		}
-		.noprint {
-			display: none;
-		}
-		.onlyprint {
-			visibility: visible;
-		}
-		.container {
-			break-after: always;
-			/* for firefox */
-			page-break-after: always;
-			/* for webkit */
-			-webkit-column-break-after: always;
-		}
-	}
+}
