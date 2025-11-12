@@ -50,7 +50,7 @@
 			let count = 0;
 
 			if (total < target) {
-				count = Math.floor(remainingAmount / billValue) + 1;
+				count = Math.ceil(remainingAmount / billValue);
 				if (count > billQuantity) {
 					count = billQuantity;
 				}
