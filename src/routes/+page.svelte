@@ -4,24 +4,16 @@
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
-	import { parseToCurrency } from '$lib/utils/currency';
-	import html2canvas from 'html2canvas';
 	import { Icon } from 'svelte-icons-pack';
-	import {
-		BsCurrencyExchange,
-		BsPlus,
-		BsPlusCircleFill,
-		BsPencil,
-		BsSave
-	} from 'svelte-icons-pack/bs';
-	import { BiSolidShareAlt, BiCoin } from 'svelte-icons-pack/bi';
-	import { FaSolidMoneyBill1Wave } from 'svelte-icons-pack/fa';
+	import { BsCurrencyExchange, BsPlusCircleFill, BsPencil, BsSave } from 'svelte-icons-pack/bs';
+	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
 	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
+	import { share as shareImage } from '$lib/utils/share';
+	import Header from '$lib/components/Header.svelte';
+	import BillRow from '$lib/components/BillRow.svelte';
+	import Totals from '$lib/components/Totals.svelte';
 
 	const storage = new Storage(browser);
-
-	const coinColor = 'darkgoldenrod';
-	const billColor = 'darkgreen';
 
 	let bills: Bill[] = [];
 	let observations: string[] = [];
@@ -48,28 +40,6 @@
 		(sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0),
 		0
 	);
-
-	async function share(): Promise<void> {
-		const canvas = await html2canvas(mainContent);
-		canvas.toBlob(async (blob) => {
-			if (!blob) {
-				return;
-			}
-			if (navigator.share) {
-				const file = new File([blob], 'calculadora-de-cedulas.png', { type: 'image/png' });
-				await navigator.share({
-					files: [file],
-					title: 'Calculadora de Cédulas',
-					text: 'Confira o cálculo'
-				});
-			} else {
-				const a = document.createElement('a');
-				a.href = URL.createObjectURL(blob);
-				a.download = 'calculadora-de-cedulas.png';
-				a.click();
-			}
-		});
-	}
 
 	function refreshTime() {
 		currentDate = new Date().toLocaleString('pt-BR');
@@ -125,7 +95,7 @@
 
 	function updateBills(): void {
 		bills = bills.map((bill) => {
-			bill.quantity = String(bill.quantity).replaceAll(/[^0-9\+\-\*\/]/g, '');
+			bill.quantity = String(bill.quantity).replaceAll(/[^0-9+\-*/]/g, '');
 			const value = getValueExpr(bill.quantity);
 			const quantity = Number(value);
 			if (!isNaN(quantity)) {
@@ -190,8 +160,8 @@
 </svelte:head>
 
 <div class="main-content" bind:this={mainContent}>
-	<header class="container">
-		<div class="container">
+	<Header>
+		<div slot="title" class="container">
 			<button
 				class="transparent noprint"
 				title="Editar nome"
@@ -214,7 +184,7 @@
 				<h1>{pageName || 'Calculadora de cédulas'}</h1>
 			{/if}
 		</div>
-		<div class="container">
+		<div slot="buttons" class="container">
 			<button
 				class="transparent noprint"
 				title="Trocar Notas"
@@ -228,19 +198,15 @@
 				class="transparent noprint"
 				title="Compartilhar"
 				on:click={() => {
-					share();
+					shareImage(mainContent);
 				}}
 			>
 				<Icon src={BiSolidShareAlt} color="darkblue" />
 			</button>
 		</div>
-	</header>
+	</Header>
 	{#each bills as bill, i}
-		<div class="container">
-			<label class={`value ${bill.type}`} for={`bill-quantity-${i}`}>
-				<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
-				{parseToCurrency(bill.value)}
-			</label>
+		<BillRow {bill} index={i}>
 			<input
 				type="text"
 				inputmode="numeric"
@@ -254,28 +220,9 @@
 				on:change={() => updateBills()}
 				on:keydown={(e) => goToNext(e, i)}
 			/>
-			<label class="total-label" for={`bill-quantity-${i}`}>{parseToCurrency(bill.total)}</label>
-		</div>
+		</BillRow>
 	{/each}
-	<div class="container total">
-		<h1>
-			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
-				src={BiCoin}
-				color={coinColor}
-			/> Total: {parseToCurrency(total)}
-		</h1>
-		<h2 class="bill">
-			<Icon src={FaSolidMoneyBill1Wave} /> Cédulas: {parseToCurrency(totalBills)}
-		</h2>
-		<h2 class="coin"><Icon src={BiCoin} /> Moedas: {parseToCurrency(totalCoins)}</h2>
-		<h2>
-			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
-				src={BiCoin}
-				color={coinColor}
-			/> Quantidade Total:
-			{totalQuantity}
-		</h2>
-	</div>
+	<Totals {total} {totalBills} {totalCoins} {totalQuantity} />
 	<div class="observations container">
 		{#each observations as observation, i}
 			<div class="side-button container">

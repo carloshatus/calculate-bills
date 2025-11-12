@@ -4,26 +4,24 @@
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
-	import { parseToCurrency } from '$lib/utils/currency';
-	import html2canvas from 'html2canvas';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsCurrencyExchange, BsPlus } from 'svelte-icons-pack/bs';
-	import { BiSolidShareAlt, BiCoin } from 'svelte-icons-pack/bi';
-	import { FaSolidMoneyBill1Wave } from 'svelte-icons-pack/fa';
+	import { BsCurrencyExchange } from 'svelte-icons-pack/bs';
+	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
+	import { share as shareImage } from '$lib/utils/share';
+	import Header from '$lib/components/Header.svelte';
+	import BillRow from '$lib/components/BillRow.svelte';
+	import Totals from '$lib/components/Totals.svelte';
 
 	const storage = new Storage(browser);
-
-	const coinColor = 'darkgoldenrod';
-	const billColor = 'darkgreen';
 
 	let mainContent: HTMLElement;
 	let availableBills: Bill[] = storage.get<Bill[]>('billsSaved') || [];
 	let amount: number | null = storage.get<number>('amountSaved') || null;
 	let result: Bill[] = [];
-	let total: number = 0;
-	let rest: number = 0;
-	let totalBills: number = 0;
-	let totalCoins: number = 0;
+	let total = 0;
+	let rest = 0;
+	let totalBills = 0;
+	let totalCoins = 0;
 
 	if (amount) {
 		exchange();
@@ -90,37 +88,15 @@
 			exchange();
 		}
 	}
-
-	async function share(): Promise<void> {
-		const canvas = await html2canvas(mainContent);
-		canvas.toBlob(async (blob) => {
-			if (!blob) {
-				return;
-			}
-			if (navigator.share) {
-				const file = new File([blob], 'calculadora-de-cedulas.png', { type: 'image/png' });
-				await navigator.share({
-					files: [file],
-					title: 'Calculadora de Cédulas',
-					text: 'Confira o cálculo'
-				});
-			} else {
-				const a = document.createElement('a');
-				a.href = URL.createObjectURL(blob);
-				a.download = 'calculadora-de-cedulas.png';
-				a.click();
-			}
-		});
-	}
 </script>
 
 <div class="main-content" bind:this={mainContent}>
-	<header class="container">
-		<h1>Trocar Notas</h1>
-		<div class="container">
+	<Header>
+		<h1 slot="title">Trocar Notas</h1>
+		<div slot="buttons" class="container">
 			<button
 				class="transparent noprint"
-				title="Trocar Notas"
+				title="Calculadora"
 				on:click={() => {
 					goto(base);
 				}}
@@ -131,13 +107,13 @@
 				class="transparent noprint"
 				title="Compartilhar"
 				on:click={() => {
-					share();
+					shareImage(mainContent);
 				}}
 			>
 				<Icon src={BiSolidShareAlt} color="darkblue" />
 			</button>
 		</div>
-	</header>
+	</Header>
 
 	<div class="container">
 		<label for="amount">Valor a ser trocado:</label>
@@ -157,32 +133,10 @@
 			<h1>Resultado:</h1>
 		</div>
 		{#each result as bill, i}
-			<div class="container">
-				<p class="value">
-					<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
-					{parseToCurrency(bill.value)}
-				</p>
-				<i class="bill-quantity">{bill.quantity}</i>
-				<i class="total-label">{parseToCurrency(bill.total)}</i>
-			</div>
+			<BillRow {bill} readonly={true} index={i} />
 		{/each}
 	{/if}
-	<div class="container total">
-		<h1>
-			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
-				src={BiCoin}
-				color={coinColor}
-			/>Total: {parseToCurrency(total)}
-		</h1>
-		<h1>
-			<Icon src={FaSolidMoneyBill1Wave} color={billColor} /><Icon src={BsPlus} /><Icon
-				src={BiCoin}
-				color={coinColor}
-			/>Sobra: {parseToCurrency(rest)}
-		</h1>
-		<h2 class="bill"><Icon src={FaSolidMoneyBill1Wave} />Cédulas: {parseToCurrency(totalBills)}</h2>
-		<h2 class="coin"><Icon src={BiCoin} />Moedas: {parseToCurrency(totalCoins)}</h2>
-	</div>
+	<Totals {total} {totalBills} {totalCoins} {rest} />
 	<botton class="container">
 		<p class="onlyprint">{new Date().toLocaleString('pt-BR')}</p>
 	</botton>
