@@ -67,6 +67,26 @@ npm run dev
 
 Abra seu navegador e acesse `http://localhost:5173` (ou a porta indicada no seu terminal).
 
+## Executando Testes
+
+O projeto inclui testes end-to-end (E2E) com Playwright e testes de unidade com Vitest.
+
+### Testes End-to-End (E2E)
+
+Para executar os testes E2E com Playwright:
+
+```bash
+npm test
+```
+
+### Testes de Unidade
+
+Para executar os testes de unidade com Vitest:
+
+```bash
+npm run test:unit
+```
+
 ## Build para Produção
 
 Para criar uma versão otimizada para produção:
