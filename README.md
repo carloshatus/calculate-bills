@@ -1,38 +1,80 @@
-# create-svelte
+# Calculadora de Cédulas
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Uma aplicação web simples e eficiente para auxiliar na contagem de dinheiro (cédulas e moedas) e no cálculo de troco.
 
-## Creating a project
+## Funcionalidades
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Contagem de Cédulas e Moedas**: Insira a quantidade de cada cédula e moeda para obter o total.
+- **Cálculo em Tempo Real**: Os totais são atualizados automaticamente à medida que você digita.
+- **Observações**: Adicione notas ou observações à sua contagem.
+- **Calculadora de Troco**: Uma ferramenta para ajudar a determinar as notas necessárias para um determinado valor de troco, com base nas notas disponíveis.
+- **Persistência de Dados**: Suas contagens e observações são salvas no `localStorage` do seu navegador, para que você não perca seu trabalho ao recarregar a página.
+- **Compartilhamento**: Exporte e compartilhe sua contagem como uma imagem.
+- **Progressive Web App (PWA)**: Pode ser "instalado" em dispositivos móveis para uma experiência de aplicativo nativo.
+
+## Páginas
+
+### 1. Calculadora Principal
+
+A página principal onde você pode realizar a contagem de cédulas e moedas.
+
+- Insira a quantidade de cada item.
+- As somas parciais e o total geral são calculados instantaneamente.
+- Adicione observações de texto livre.
+- Limpe todos os campos para recomeçar.
+- Dê um nome à sua contagem para fácil identificação ao compartilhar.
+
+### 2. Trocar Notas
+
+Acessível através do ícone de troca na calculadora principal, esta página ajuda a calcular o troco.
+
+- Informe um valor para o qual você precisa dar troco.
+- A calculadora usará as notas e moedas (de R$20 para baixo) que você informou ter na página principal para sugerir a melhor combinação para o troco.
+
+## Tecnologias Utilizadas
+
+- [SvelteKit](https://kit.svelte.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/)
+- [Svelte Icons Pack](https://github.com/Cweili/svelte-icons-pack)
+- CSS puro para estilização.
+- [Playwright](https://playwright.dev/) para testes End-to-End.
+
+## Como Executar o Projeto Localmente
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) (versão 16 ou superior)
+- [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
+
+### Instalação
+
+Clone o repositório e instale as dependências:
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+git clone https://github.com/seu-usuario/calculate-bills-v0.git
+cd calculate-bills-v0
+npm install
 ```
 
-## Developing
+### Desenvolvimento
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Abra seu navegador e acesse `http://localhost:5173` (ou a porta indicada no seu terminal).
 
-To create a production version of your app:
+## Build para Produção
+
+Para criar uma versão otimizada para produção:
 
 ```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Você pode visualizar o build de produção com `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+> Para fazer o deploy da sua aplicação, você pode precisar instalar um [adapter](https://kit.svelte.dev/docs/adapters) para o seu ambiente de destino.
