@@ -1,3 +1,12 @@
+/* ==========================================================================
+   Base & Layout
+   ========================================================================== */
+
+.main-content {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
 .container {
 	font-family: sans-serif;
 	font-size: 0.8em;
@@ -8,6 +17,56 @@
 	align-content: space-between;
 	padding: 10px 50px;
 }
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+header {
+	margin-bottom: 10px;
+}
+
+header .container {
+	padding: 0px;
+}
+
+header h1,
+.name-page {
+	font-family: sans-serif;
+	padding: 10px 0px;
+	font-size: 1.8em;
+}
+
+.name-page {
+	max-width: 70%;
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+/* Buttons & Icons
+   -------------------------------------------------------------------------- */
+button {
+	font-size: 1.4em;
+}
+
+
+botton button,
+header button {
+	font-size: 2.4em;
+}
+
+.side-button {
+	justify-content: flex-start;
+}
+
+svg {
+	padding: 2px;
+}
+
+/* Bill & Coin Items
+   -------------------------------------------------------------------------- */
 
 .value {
 	width: 30%;
@@ -22,34 +81,44 @@
 	color: darkgreen;
 }
 
-.total-label {
-	width: 25%;
-}
-
 .bill-quantity {
 	min-width: 40%;
 	width: auto;
 }
+
+/* Totals Section
+   -------------------------------------------------------------------------- */
 
 .total {
 	margin-top: 25px;
 	padding-right: 70px;
 }
 
-.total > h1 {
+.total-label {
+	width: 25%;
+}
+
+.total>h1 {
 	font-family: sans-serif;
 	font-size: 1.6em;
 	margin-bottom: 15px;
 }
 
-.total > h1 > i {
+.total>h1>i {
 	font-size: 0.7em;
 }
 
-.total > h2 {
+.total>h2 {
 	font-family: sans-serif;
 	font-size: 1.2em;
 	margin-bottom: 15px;
+}
+
+/* Observations Section
+   -------------------------------------------------------------------------- */
+
+.observations {
+	justify-content: flex-start;
 }
 
 .observations h2 {
@@ -57,63 +126,36 @@
 	font-size: 1.2em;
 }
 
-header {
-	margin-bottom: 10px;
+.observations>div {
+	flex-grow: 1;
 }
 
-header h1,
-.name-page {
-	font-family: sans-serif;
-	padding: 10px 0px;
-	font-size: 1.6em;
+.observation {
+	width: 90%;
 }
 
-.name-page {
-	max-width: 80em;
-}
 
-botton button,
-header button {
-	font-size: 1.8em;
-}
-
-header .container {
-	padding: 0px;
-}
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
 
 .transparent {
 	border: none;
 	background-color: transparent;
 }
 
-.observation {
-	width: 80%;
-}
-
-.observations {
-	justify-content: flex-start;
-}
-
-.observations > div {
-	flex-grow: 1;
-}
-
-.side-button {
-	justify-content: flex-start;
+.dateStamp {
+	color: darkgray;
 }
 
 .onlyprint {
 	visibility: hidden;
 }
 
-.main-content {
-	max-width: 1200px;
-	margin: 0 auto;
-}
 
-svg {
-	padding: 2px;
-}
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
 
 @media print {
 	input {

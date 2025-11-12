@@ -8,10 +8,10 @@
 	import { BsCurrencyExchange } from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
 	import { share as shareImage } from '$lib/utils/share';
+	import { refreshTime } from '$lib/utils/time';
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
-
 	const storage = new Storage(browser);
 
 	let mainContent: HTMLElement;
@@ -22,10 +22,13 @@
 	let rest = 0;
 	let totalBills = 0;
 	let totalCoins = 0;
+	let currentDate: string = refreshTime();
 
 	if (amount) {
 		exchange();
 	}
+
+	setInterval(() => (currentDate = refreshTime()), 1000);
 
 	function exchange() {
 		total = 0;
@@ -90,6 +93,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{`'Trocar Notas'} ${currentDate}`}</title>
+</svelte:head>
+
 <div class="main-content" bind:this={mainContent}>
 	<Header>
 		<h1 slot="title">Trocar Notas</h1>
@@ -138,6 +145,6 @@
 	{/if}
 	<Totals {total} {totalBills} {totalCoins} {rest} />
 	<botton class="container">
-		<p class="onlyprint">{new Date().toLocaleString('pt-BR')}</p>
+		<p class="dateStamp">{currentDate}</p>
 	</botton>
 </div>

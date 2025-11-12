@@ -9,6 +9,7 @@
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
 	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
 	import { share as shareImage } from '$lib/utils/share';
+	import { refreshTime } from '$lib/utils/time';
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
@@ -18,7 +19,7 @@
 	let bills: Bill[] = [];
 	let observations: string[] = [];
 	let observation = '';
-	let currentDate = '';
+	let currentDate: string = refreshTime();
 	let mainContent: HTMLElement;
 
 	let edit = false;
@@ -28,7 +29,7 @@
 	let pageNameInput: HTMLInputElement;
 
 	start();
-	setInterval(refreshTime, 1000);
+	setInterval(() => (currentDate = refreshTime()), 1000);
 
 	$: total = bills.reduce((sum, { total }) => (sum += total), 0);
 	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += Number(quantity) || 0), 0);
@@ -40,10 +41,6 @@
 		(sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0),
 		0
 	);
-
-	function refreshTime() {
-		currentDate = new Date().toLocaleString('pt-BR');
-	}
 
 	function start(): void {
 		const billsFound = storage.get<Bill[]>('billsSaved');
@@ -254,7 +251,7 @@
 		</button>
 	</div>
 	<botton class="container">
-		<p class="onlyprint">{currentDate}</p>
+		<p class="dateStamp">{currentDate}</p>
 		<button
 			class="transparent noprint"
 			title="Limpar"
