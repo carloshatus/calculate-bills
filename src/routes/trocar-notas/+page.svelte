@@ -94,7 +94,7 @@
 </script>
 
 <svelte:head>
-	<title>{`'Trocar Notas'} ${currentDate}`}</title>
+	<title>{`Trocar Notas ${currentDate}`}</title>
 </svelte:head>
 
 <div class="main-content" bind:this={mainContent}>
