@@ -12,7 +12,7 @@
 
 <div class="container">
 	{#if readonly}
-		<p class="value">
+		<p class={`value ${bill.type}`}>
 			<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
 			{parseToCurrency(bill.value)}
 		</p>
