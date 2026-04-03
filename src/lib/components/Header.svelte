@@ -26,14 +26,14 @@
 	});
 </script>
 
-<header class="main-header noprint">
+<header class="main-header">
 	<div class="header-container">
 		<div class="header-left">
 			<slot name="title" />
 		</div>
 		
 		{#if $$slots.buttons}
-			<div class="menu-container">
+			<div class="menu-container noprint">
 				<button 
 					class="menu-toggle-btn" 
 					class:active={menuOpen}

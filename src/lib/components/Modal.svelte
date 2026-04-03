@@ -37,7 +37,7 @@
 
 {#if show}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<div class="modal-backdrop" on:click={handleClose} transition:fade={{ duration: 200 }}>
+	<div class="modal-backdrop noprint" on:click={handleClose} transition:fade={{ duration: 200 }}>
 		<div 
 			class="modal-content" 
 			on:click|stopPropagation 

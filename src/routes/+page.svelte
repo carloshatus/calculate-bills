@@ -357,12 +357,12 @@
 
 	<Totals {total} {totalBills} {totalCoins} {totalQuantity} />
 
-	<div class="card observations-section noprint">
+	<div class="card observations-section" class:noprint={observations.length === 0}>
 		<div class="section-header">
 			<h2>Observações</h2>
 		</div>
 
-		<div class="obs-input-group">
+		<div class="obs-input-group noprint">
 			<input
 				type="text"
 				placeholder="Adicionar observação..."
@@ -379,7 +379,7 @@
 				{#each observations as obs, i}
 					<div class="obs-item">
 						<span class="obs-text">{obs}</span>
-						<button class="delete-obs" on:click={() => clear(i)}>
+						<button class="delete-obs noprint" on:click={() => clear(i)}>
 							<Icon src={AiOutlineDelete} />
 						</button>
 					</div>
