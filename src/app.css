@@ -134,6 +134,17 @@ svg {
 	width: 90%;
 }
 
+.available-info {
+	padding: 0px 50px;
+	margin-top: -10px;
+	color: #666;
+	justify-content: flex-start;
+}
+
+.available-info p {
+	margin: 0;
+}
+
 
 /* ==========================================================================
    Utility Classes

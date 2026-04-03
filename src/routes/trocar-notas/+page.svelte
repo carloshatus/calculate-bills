@@ -12,6 +12,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
+	import { parseToCurrency } from '$lib/utils/currency';
 	const storage = new Storage(browser);
 
 	let mainContent: HTMLElement;
@@ -23,6 +24,9 @@
 	let totalBills = 0;
 	let totalCoins = 0;
 	let currentDate: string = refreshTime();
+	$: totalAvailable = availableBills
+		.filter((bill) => bill.value <= 20)
+		.reduce((sum, bill) => sum + (Number(bill.quantity) || 0) * bill.value, 0);
 
 	if (amount) {
 		exchange();
@@ -66,7 +70,8 @@
 					value: billValue,
 					quantity: count,
 					total: count * billValue,
-					type: bill.type
+					type: bill.type,
+					originalQuantity: billQuantity
 				});
 			}
 			if (result.length) {
@@ -134,13 +139,16 @@
 		/>
 		<button class="noprint" on:click={exchange}>Trocar</button>
 	</div>
+	<div class="container available-info">
+		<p>Disponível para troca: <strong>{parseToCurrency(totalAvailable)}</strong></p>
+	</div>
 
 	{#if result.length > 0}
 		<div class="container total">
 			<h1>Resultado:</h1>
 		</div>
 		{#each result as bill, i}
-			<BillRow {bill} readonly={true} index={i} />
+			<BillRow {bill} readonly={true} index={i} originalQuantity={bill.originalQuantity} />
 		{/each}
 	{/if}
 	<Totals {total} {totalBills} {totalCoins} {rest} />

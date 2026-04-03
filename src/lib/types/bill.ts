@@ -8,4 +8,5 @@ export type Bill = {
 	quantity: number | null | string;
 	total: number;
 	type: BillTypes;
+	originalQuantity?: number | null | string;
 };

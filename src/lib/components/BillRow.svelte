@@ -8,6 +8,7 @@
 	export let bill: Bill;
 	export let readonly = false;
 	export let index: number;
+	export let originalQuantity: number | string | null = null;
 </script>
 
 <div class="container">
@@ -16,7 +17,12 @@
 			<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
 			{parseToCurrency(bill.value)}
 		</p>
-		<i class="bill-quantity">{bill.quantity}</i>
+		<i class="bill-quantity">
+			{bill.quantity}
+			{#if originalQuantity}
+				/ {originalQuantity}
+			{/if}
+		</i>
 		<i class="total-label">{parseToCurrency(bill.total)}</i>
 	{:else}
 		<label class={`value ${bill.type}`} for="bill-quantity-{index}">
