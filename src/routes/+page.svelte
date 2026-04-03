@@ -3,7 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import { type Bill, BillTypes, type SavedCalculation } from '$lib/types/bill';
+	import * as historyService from '$lib/services/historyService';
+	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
 	import {
 		BsCurrencyExchange,
@@ -21,6 +22,7 @@
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import { onMount } from 'svelte';
 
 	const storage = new Storage(browser);
 
@@ -29,6 +31,7 @@
 	let observation = '';
 	let currentDate: string = refreshTime();
 	let mainContent: HTMLElement;
+	let isReady = false;
 
 	let modalConfig = {
 		show: false,
@@ -77,15 +80,12 @@
 	let inputs: HTMLInputElement[] = [];
 	let pageNameInput: HTMLInputElement;
 
-	import { onMount } from 'svelte';
-
-	start();
-	setInterval(() => (currentDate = refreshTime()), 1000);
-
-	let isReady = false;
 	onMount(() => {
 		isReady = true;
+		start();
 	});
+
+	setInterval(() => (currentDate = refreshTime()), 1000);
 
 	$: total = bills.reduce((sum, { total }) => (sum += total), 0);
 	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += Number(quantity) || 0), 0);
@@ -168,7 +168,6 @@
 		storage.save('billsSaved', bills);
 		storage.save('observationsSaved', observations);
 		storage.delete('pageName');
-
 		storage.delete('amountSaved');
 	}
 
@@ -185,9 +184,8 @@
 		bills = bills.map((bill) => {
 			bill.quantity = String(bill.quantity).replaceAll(/[^0-9+\-*/]/g, '');
 			const value = getValueExpr(bill.quantity);
-			const quantity = Number(value);
-			if (!isNaN(quantity)) {
-				bill.total = quantity * bill.value;
+			if (!isNaN(value)) {
+				bill.total = value * bill.value;
 			}
 			return bill;
 		});
@@ -208,11 +206,8 @@
 	}
 
 	function goToConfirm(e: KeyboardEvent): void {
-		const { key } = e;
-		if (['Enter', 'ArrowDown', 'ArrowUp'].includes(key)) {
+		if (e.key === 'Enter') {
 			e.preventDefault();
-		}
-		if (key === 'Enter') {
 			addObs();
 		}
 	}
@@ -221,7 +216,7 @@
 		tempName = pageName;
 		edit = true;
 		setTimeout(() => {
-			pageNameInput.focus();
+			pageNameInput?.focus();
 		}, 100);
 	}
 
@@ -244,26 +239,13 @@
 	}
 
 	function clear(index: number): void {
-		if (index >= 0) {
-			observations.splice(index, 1);
-			observations = observations;
-			storage.save('observationsSaved', observations);
-		}
+		observations = observations.filter((_, i) => i !== index);
+		storage.save('observationsSaved', observations);
 	}
 
 	function saveCurrentCalculation(silent = false): void {
-		const history = storage.get<SavedCalculation[]>('history') || [];
-		const newCalculation: SavedCalculation = {
-			id: crypto.randomUUID(),
-			name: pageName || 'Sem título',
-			date: new Date().toISOString(),
-			bills: JSON.parse(JSON.stringify(bills)),
-			observations: [...observations],
-			total: total
-		};
-
-		history.unshift(newCalculation);
-		storage.save('history', history);
+		const newCalc = historyService.createSavedCalculation(bills, observations, pageName, total);
+		historyService.saveToHistory(storage, newCalc);
 
 		if (!silent) {
 			openModal({
@@ -310,7 +292,8 @@
 			{/if}
 			<p class="dateStamp">{currentDate.split(' ')[1]}</p>
 		</div>
-		<slot slot="buttons">
+
+		<div slot="buttons">
 			<button class="action-btn" title="Trocar Notas" on:click={() => goto(`${base}/trocar-notas`)}>
 				<Icon src={BsCurrencyExchange} />
 				<span>Trocar Notas</span>
@@ -348,7 +331,7 @@
 				<Icon src={AiOutlineClear} />
 				<span>Limpar Tudo</span>
 			</button>
-		</slot>
+		</div>
 	</Header>
 
 	<div class="bills-list">

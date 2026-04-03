@@ -5,7 +5,8 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import { BillTypes, type SavedCalculation, type Bill } from '$lib/types/bill';
+	import * as historyService from '$lib/services/historyService';
+	import { BillTypes, type SavedCalculation } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
 	import { BsArrowLeft, BsArrowCounterclockwise } from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
@@ -51,7 +52,7 @@
 
 	onMount(() => {
 		const id = $page.params.id;
-		const history = storage.get<SavedCalculation[]>('history') || [];
+		const history = historyService.getHistory(storage);
 		calculation = history.find((c) => c.id === id) || null;
 
 		if (!calculation) {
@@ -63,33 +64,6 @@
 			});
 		}
 	});
-
-	function saveCurrentAndRestore(calcToRestore: SavedCalculation) {
-		const currentBills = storage.get<Bill[]>('billsSaved') || [];
-		const currentObs = storage.get<string[]>('observationsSaved') || [];
-		const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
-
-		const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
-
-		const backup: SavedCalculation = {
-			id: crypto.randomUUID(),
-			name: currentName,
-			date: new Date().toISOString(),
-			bills: currentBills,
-			observations: currentObs,
-			total: total
-		};
-
-		const history = storage.get<SavedCalculation[]>('history') || [];
-		const updatedHistory = [backup, ...history];
-		storage.save('history', updatedHistory);
-
-		// Now restore
-		storage.save('billsSaved', calcToRestore.bills);
-		storage.save('observationsSaved', calcToRestore.observations);
-		storage.save('pageName', calcToRestore.name);
-		goto(`${base}/`);
-	}
 
 	function restoreCalculation() {
 		if (!calculation) return;
@@ -103,12 +77,13 @@
 			confirmText: 'Restaurar sem salvar',
 			extraActionText: 'Salvar atual e Restaurar',
 			onConfirm: () => {
-				storage.save('billsSaved', calc.bills);
-				storage.save('observationsSaved', calc.observations);
-				storage.save('pageName', calc.name);
+				historyService.restore(storage, calc);
 				goto(`${base}/`);
 			},
-			onExtraAction: () => saveCurrentAndRestore(calc)
+			onExtraAction: () => {
+				historyService.saveCurrentAndRestore(storage, calc);
+				goto(`${base}/`);
+			}
 		});
 	}
 
@@ -143,11 +118,7 @@
 				<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
 			</div>
 			<div slot="buttons">
-				<button
-					class="action-btn restore"
-					title="Restaurar"
-					on:click={restoreCalculation}
-				>
+				<button class="action-btn restore" title="Restaurar" on:click={restoreCalculation}>
 					<Icon src={BsArrowCounterclockwise} />
 					<span>Restaurar</span>
 				</button>

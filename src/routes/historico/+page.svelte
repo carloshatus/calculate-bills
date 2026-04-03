@@ -3,9 +3,19 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import type { SavedCalculation, Bill } from '$lib/types/bill';
+	import type { SavedCalculation } from '$lib/types/bill';
+	import * as historyService from '$lib/services/historyService';
+	import { formatDate } from '$lib/utils/time';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsArrowLeft, BsEye, BsTrash, BsPencil, BsCheckLg, BsXLg, BsArrowCounterclockwise } from 'svelte-icons-pack/bs';
+	import {
+		BsArrowLeft,
+		BsEye,
+		BsTrash,
+		BsPencil,
+		BsCheckLg,
+		BsXLg,
+		BsArrowCounterclockwise
+	} from 'svelte-icons-pack/bs';
 	import { parseToCurrency } from '$lib/utils/currency';
 	import Header from '$lib/components/Header.svelte';
 	import Modal from '$lib/components/Modal.svelte';
@@ -14,7 +24,7 @@
 	let history: SavedCalculation[] = [];
 
 	if (browser) {
-		history = storage.get<SavedCalculation[]>('history') || [];
+		history = historyService.getHistory(storage);
 	}
 
 	let modalConfig = {
@@ -62,8 +72,7 @@
 	}
 
 	function saveName(id: string) {
-		history = history.map((c) => (c.id === id ? { ...c, name: newName } : c));
-		storage.save('history', history);
+		history = historyService.updateCalculationName(storage, id, newName);
 		editingId = null;
 	}
 
@@ -78,8 +87,7 @@
 			type: 'danger',
 			confirmText: 'Excluir',
 			onConfirm: () => {
-				history = history.filter((c) => c.id !== id);
-				storage.save('history', history);
+				history = historyService.deleteFromHistory(storage, id);
 			}
 		});
 	}
@@ -92,41 +100,14 @@
 			type: 'danger',
 			confirmText: 'Limpar tudo',
 			onConfirm: () => {
+				historyService.clearHistory(storage);
 				history = [];
-				storage.save('history', []);
 			}
 		});
 	}
 
 	function viewCalculation(id: string) {
 		goto(`${base}/historico/${id}`);
-	}
-
-	function saveCurrentAndRestore(calcToRestore: SavedCalculation) {
-		const currentBills = storage.get<Bill[]>('billsSaved') || [];
-		const currentObs = storage.get<string[]>('observationsSaved') || [];
-		const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
-
-		const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
-
-		const backup: SavedCalculation = {
-			id: crypto.randomUUID(),
-			name: currentName,
-			date: new Date().toISOString(),
-			bills: currentBills,
-			observations: currentObs,
-			total: total
-		};
-
-		const updatedHistory = [backup, ...history];
-		storage.save('history', updatedHistory);
-		history = updatedHistory;
-
-		// Now restore
-		storage.save('billsSaved', calcToRestore.bills);
-		storage.save('observationsSaved', calcToRestore.observations);
-		storage.save('pageName', calcToRestore.name);
-		goto(`${base}/`);
 	}
 
 	function restoreCalculation(calc: SavedCalculation) {
@@ -138,17 +119,14 @@
 			confirmText: 'Restaurar sem salvar',
 			extraActionText: 'Salvar atual e Restaurar',
 			onConfirm: () => {
-				storage.save('billsSaved', calc.bills);
-				storage.save('observationsSaved', calc.observations);
-				storage.save('pageName', calc.name);
+				historyService.restore(storage, calc);
 				goto(`${base}/`);
 			},
-			onExtraAction: () => saveCurrentAndRestore(calc)
+			onExtraAction: () => {
+				historyService.saveCurrentAndRestore(storage, calc);
+				goto(`${base}/`);
+			}
 		});
-	}
-
-	function formatDate(dateStr: string) {
-		return new Date(dateStr).toLocaleString('pt-BR');
 	}
 </script>
 
