@@ -5,7 +5,8 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import { type SavedCalculation, BillTypes } from '$lib/types/bill';
+	import { BillTypes } from '$lib/types/bill';
+	import type { SavedCalculation } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
 	import { BsArrowLeft } from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
@@ -25,7 +26,9 @@
 		message: '',
 		type: 'info' as 'info' | 'danger' | 'success',
 		confirmText: 'Confirmar',
-		onConfirm: () => {}
+		onConfirm: () => {
+			/* noop */
+		}
 	};
 
 	function openModal(config: Partial<typeof modalConfig>) {
@@ -34,7 +37,9 @@
 			show: true,
 			type: 'info',
 			confirmText: 'Confirmar',
-			onConfirm: () => {},
+			onConfirm: () => {
+				/* noop */
+			},
 			...config
 		};
 	}
@@ -54,10 +59,18 @@
 		}
 	});
 
-	$: totalBills = calculation?.bills.reduce((sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0), 0) || 0;
-	$: totalCoins = calculation?.bills.reduce((sum, { type, total }) => (sum += type === BillTypes.COIN ? total : 0), 0) || 0;
-	$: totalQuantity = calculation?.bills.reduce((sum, { quantity }) => (sum += Number(quantity) || 0), 0) || 0;
-
+	$: totalBills =
+		calculation?.bills.reduce(
+			(sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0),
+			0
+		) || 0;
+	$: totalCoins =
+		calculation?.bills.reduce(
+			(sum, { type, total }) => (sum += type === BillTypes.COIN ? total : 0),
+			0
+		) || 0;
+	$: totalQuantity =
+		calculation?.bills.reduce((sum, { quantity }) => (sum += Number(quantity) || 0), 0) || 0;
 </script>
 
 <svelte:head>
@@ -65,77 +78,73 @@
 </svelte:head>
 
 {#if calculation}
-<div class="main-content" bind:this={mainContent}>
-	<Header>
-		<div slot="title" class="title-container">
-			<div class="header-left">
+	<div class="main-content" bind:this={mainContent}>
+		<Header>
+			<div slot="title" class="title-container">
+				<div class="header-left">
+					<button class="back-btn" title="Voltar" on:click={() => goto(`${base}/historico`)}>
+						<Icon src={BsArrowLeft} />
+					</button>
+					<h1>{calculation.name}</h1>
+				</div>
+				<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
+			</div>
+			<slot slot="buttons">
 				<button
-					class="back-btn"
-					title="Voltar"
-					on:click={() => goto(`${base}/historico`)}
+					class="action-btn share"
+					title="Compartilhar"
+					on:click={() => shareImage(mainContent)}
 				>
-					<Icon src={BsArrowLeft} />
+					<Icon src={BiSolidShareAlt} />
+					<span>Compartilhar</span>
 				</button>
-				<h1>{calculation.name}</h1>
-			</div>
-			<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
-		</div>
-		<slot slot="buttons">
-			<button
-				class="action-btn share"
-				title="Compartilhar"
-				on:click={() => shareImage(mainContent)}
-			>
-				<Icon src={BiSolidShareAlt} />
-				<span>Compartilhar</span>
-			</button>
-		</slot>
-	</Header>
+			</slot>
+		</Header>
 
-	<div class="bills-list">
-		{#each calculation.bills as bill, i}
-			{#if Number(bill.quantity) > 0}
-				<BillRow {bill} readonly={true} index={i} />
-			{/if}
-		{/each}
+		<div class="bills-list">
+			{#each calculation.bills as bill, i}
+				{#if Number(bill.quantity) > 0}
+					<BillRow {bill} readonly={true} index={i} />
+				{/if}
+			{/each}
+		</div>
+
+		<Totals total={calculation.total} {totalBills} {totalCoins} {totalQuantity} />
+
+		{#if calculation.observations.length > 0}
+			<div class="card observations-section">
+				<div class="section-header">
+					<h2>Observações</h2>
+				</div>
+				<div class="obs-list">
+					{#each calculation.observations as obs}
+						<div class="obs-item">
+							<span class="obs-text">{obs}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<footer class="onlyprint footer-print">
+			<p>Contagem gerada em: {new Date(calculation.date).toLocaleString('pt-BR')}</p>
+		</footer>
+
+		<Modal
+			bind:show={modalConfig.show}
+			title={modalConfig.title}
+			message={modalConfig.message}
+			type={modalConfig.type}
+			confirmText={modalConfig.confirmText}
+			showCancel={false}
+			onConfirm={modalConfig.onConfirm}
+		/>
 	</div>
-
-	<Totals total={calculation.total} {totalBills} {totalCoins} {totalQuantity} />
-
-	{#if calculation.observations.length > 0}
-		<div class="card observations-section">
-			<div class="section-header">
-				<h2>Observações</h2>
-			</div>
-			<div class="obs-list">
-				{#each calculation.observations as obs, i}
-					<div class="obs-item">
-						<span class="obs-text">{obs}</span>
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
-	<footer class="onlyprint footer-print">
-		<p>Contagem gerada em: {new Date(calculation.date).toLocaleString('pt-BR')}</p>
-	</footer>
-
-	<Modal
-		bind:show={modalConfig.show}
-		title={modalConfig.title}
-		message={modalConfig.message}
-		type={modalConfig.type}
-		confirmText={modalConfig.confirmText}
-		showCancel={false}
-		onConfirm={modalConfig.onConfirm}
-	/>
-</div>
 {:else}
-<div class="main-content loading-state">
-	<div class="loader"></div>
-	<p>Carregando contagem...</p>
-</div>
+	<div class="main-content loading-state">
+		<div class="loader" />
+		<p>Carregando contagem...</p>
+	</div>
 {/if}
 
 <style>
@@ -144,7 +153,6 @@
 		flex-direction: column;
 		flex: 1;
 	}
-
 
 	.bills-list {
 		padding: var(--padding);
@@ -192,10 +200,14 @@
 	}
 
 	@keyframes spin {
-		to { transform: rotate(360deg); }
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
-	.action-btn.share { color: #4f46e5; }
+	.action-btn.share {
+		color: #4f46e5;
+	}
 
 	.footer-print {
 		padding: 2rem;

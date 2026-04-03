@@ -36,10 +36,12 @@ Esta versão passou por um **overhaul completo de UI/UX**, focando em usabilidad
 ## 💻 Como Executar Localmente
 
 ### Pré-requisitos
+
 - Node.js (v18+)
 - npm ou yarn
 
 ### Instalação e Desenvolvimento
+
 ```bash
 # 1. Clone o projeto
 git clone https://github.com/seu-usuario/calculate-bills-v0.git
@@ -50,6 +52,7 @@ npm install
 # 3. Inicie o servidor de desenvolvimento
 npm run dev
 ```
+
 Acesse `http://localhost:5173` no seu navegador.
 
 ## 🧪 Qualidade do Código
@@ -67,4 +70,5 @@ npm run preview
 ```
 
 ---
-*Desenvolvido por [Carlos Hatus](https://carloshatus.github.io/) com foco em velocidade, precisão e experiência do usuário.*
+
+_Desenvolvido por [Carlos Hatus](https://carloshatus.github.io/) com foco em velocidade, precisão e experiência do usuário._

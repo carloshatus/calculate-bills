@@ -2,8 +2,8 @@ import html2canvas from 'html2canvas';
 
 export async function share(mainContent: HTMLElement): Promise<void> {
 	// PWA/Mobile experience: Add a tiny delay to ensure smooth transition
-	await new Promise(r => setTimeout(r, 100));
-	
+	await new Promise((r) => setTimeout(r, 100));
+
 	const canvas = await html2canvas(mainContent, {
 		ignoreElements: (element) => element.classList.contains('noprint'),
 		scale: 2, // High resolution

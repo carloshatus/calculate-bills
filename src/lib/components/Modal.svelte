@@ -11,11 +11,17 @@
 	export let type: 'info' | 'danger' | 'success' = 'info';
 	export let showCancel = true;
 
-	export let onConfirm: () => void = () => {};
-	export let onClose: () => void = () => {};
+	export let onConfirm: () => void = () => {
+		/* noop */
+	};
+	export let onClose: () => void = () => {
+		/* noop */
+	};
 
 	export let extraActionText = '';
-	export let onExtraAction: () => void = () => {};
+	export let onExtraAction: () => void = () => {
+		/* noop */
+	};
 	export let linkText = '';
 	export let linkUrl = '';
 
@@ -38,9 +44,9 @@
 {#if show}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div class="modal-backdrop noprint" on:click={handleClose} transition:fade={{ duration: 200 }}>
-		<div 
-			class="modal-content" 
-			on:click|stopPropagation 
+		<div
+			class="modal-content"
+			on:click|stopPropagation
 			transition:scale={{ duration: 250, start: 0.95 }}
 		>
 			<div class="modal-header">
@@ -70,8 +76,8 @@
 						{extraActionText}
 					</button>
 				{/if}
-				<button 
-					class="btn-confirm" 
+				<button
+					class="btn-confirm"
 					class:danger={type === 'danger'}
 					class:success={type === 'success'}
 					on:click={handleConfirm}

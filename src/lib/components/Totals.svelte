@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { parseToCurrency } from '$lib/utils/currency';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsPlus } from 'svelte-icons-pack/bs';
 	import { BiCoin } from 'svelte-icons-pack/bi';
 	import { FaSolidMoneyBill1Wave } from 'svelte-icons-pack/fa';
-	import { billColor, coinColor } from '$lib/constants';
 
 	export let total = 0;
 	export let totalBills = 0;
@@ -34,7 +32,7 @@
 			</div>
 			<span class="value">{parseToCurrency(totalBills)}</span>
 		</div>
-		
+
 		<div class="item">
 			<div class="icon-label coin">
 				<Icon src={BiCoin} />
@@ -120,7 +118,7 @@
 	.icon-label.coin :global(svg) {
 		color: #ffd700; /* Bright gold for icon contrast */
 	}
-	
+
 	.item .value {
 		font-weight: 700;
 		font-size: 1.1rem;
@@ -133,4 +131,3 @@
 		padding-top: 0.5rem;
 	}
 </style>
-

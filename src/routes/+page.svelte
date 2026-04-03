@@ -41,8 +41,12 @@
 		linkText: '',
 		linkUrl: '',
 		showCancel: true,
-		onConfirm: () => {},
-		onExtraAction: () => {}
+		onConfirm: () => {
+			/* noop */
+		},
+		onExtraAction: () => {
+			/* noop */
+		}
 	};
 
 	function openModal(config: Partial<typeof modalConfig>) {
@@ -56,8 +60,12 @@
 			extraActionText: '',
 			linkText: '',
 			linkUrl: '',
-			onConfirm: () => {},
-			onExtraAction: () => {},
+			onConfirm: () => {
+				/* noop */
+			},
+			onExtraAction: () => {
+				/* noop */
+			},
 			...config
 		};
 	}
@@ -69,8 +77,15 @@
 	let inputs: HTMLInputElement[] = [];
 	let pageNameInput: HTMLInputElement;
 
+	import { onMount } from 'svelte';
+
 	start();
 	setInterval(() => (currentDate = refreshTime()), 1000);
+
+	let isReady = false;
+	onMount(() => {
+		isReady = true;
+	});
 
 	$: total = bills.reduce((sum, { total }) => (sum += total), 0);
 	$: totalQuantity = bills.reduce((sum, { quantity }) => (sum += Number(quantity) || 0), 0);
@@ -266,7 +281,7 @@
 	<title>{`${pageName || 'Calculadora de cédulas'}`}</title>
 </svelte:head>
 
-<div class="main-content" bind:this={mainContent}>
+<div class="main-content" bind:this={mainContent} data-ready={isReady}>
 	<Header>
 		<div slot="title" class="title-container" class:editing={edit}>
 			{#if edit}

@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import { type SavedCalculation } from '$lib/types/bill';
+	import type { SavedCalculation, Bill } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
 	import { BsArrowLeft, BsEye, BsTrash, BsPencil, BsCheckLg, BsXLg } from 'svelte-icons-pack/bs';
 	import { parseToCurrency } from '$lib/utils/currency';
@@ -26,8 +26,12 @@
 		cancelText: 'Cancelar',
 		extraActionText: '',
 		showCancel: true,
-		onConfirm: () => {},
-		onExtraAction: () => {}
+		onConfirm: () => {
+			/* noop */
+		},
+		onExtraAction: () => {
+			/* noop */
+		}
 	};
 
 	function openModal(config: Partial<typeof modalConfig>) {
@@ -39,8 +43,12 @@
 			confirmText: 'Confirmar',
 			cancelText: 'Cancelar',
 			extraActionText: '',
-			onConfirm: () => {},
-			onExtraAction: () => {},
+			onConfirm: () => {
+				/* noop */
+			},
+			onExtraAction: () => {
+				/* noop */
+			},
 			...config
 		};
 	}
@@ -81,10 +89,10 @@
 	}
 
 	function saveCurrentAndRestore(calcToRestore: SavedCalculation) {
-		const currentBills = storage.get<any[]>('billsSaved') || [];
+		const currentBills = storage.get<Bill[]>('billsSaved') || [];
 		const currentObs = storage.get<string[]>('observationsSaved') || [];
 		const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
-		
+
 		const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
 
 		const backup: SavedCalculation = {
@@ -110,7 +118,8 @@
 	function restoreCalculation(calc: SavedCalculation) {
 		openModal({
 			title: 'Restaurar contagem?',
-			message: 'Deseja restaurar esta contagem? Isso sobrescreverá a contagem atual da calculadora.',
+			message:
+				'Deseja restaurar esta contagem? Isso sobrescreverá a contagem atual da calculadora.',
 			type: 'info',
 			confirmText: 'Restaurar sem salvar',
 			extraActionText: 'Salvar atual e Restaurar',
@@ -137,11 +146,7 @@
 	<Header>
 		<div slot="title" class="title-container">
 			<div class="header-left">
-				<button
-					class="back-btn"
-					title="Voltar"
-					on:click={() => goto(`${base}/`)}
-				>
+				<button class="back-btn" title="Voltar" on:click={() => goto(`${base}/`)}>
 					<Icon src={BsArrowLeft} />
 				</button>
 				<h1>Histórico</h1>
@@ -179,10 +184,18 @@
 							</div>
 						{:else}
 							<div class="title-row">
-								<button class="title-btn-list" on:click={() => startEdit(calc)} aria-label="Editar nome">
+								<button
+									class="title-btn-list"
+									on:click={() => startEdit(calc)}
+									aria-label="Editar nome"
+								>
 									<h3>{calc.name}</h3>
 								</button>
-								<button class="edit-trigger" on:click={() => startEdit(calc)} aria-label="Editar nome">
+								<button
+									class="edit-trigger"
+									on:click={() => startEdit(calc)}
+									aria-label="Editar nome"
+								>
 									<Icon src={BsPencil} />
 								</button>
 							</div>
@@ -192,7 +205,7 @@
 							<span class="amount">{parseToCurrency(calc.total)}</span>
 						</div>
 					</div>
-					
+
 					<div class="history-actions">
 						<button
 							class="action-btn view"
@@ -253,7 +266,6 @@
 	.title-btn-list:hover h3 {
 		color: var(--primary);
 	}
-
 
 	.history-list {
 		padding: var(--padding);
@@ -328,9 +340,15 @@
 		font-size: 1.2rem !important;
 	}
 
-	.action-btn.view { color: var(--primary); }
-	.action-btn.restore { color: var(--success); }
-	.action-btn.delete { color: var(--danger); }
+	.action-btn.view {
+		color: var(--primary);
+	}
+	.action-btn.restore {
+		color: var(--success);
+	}
+	.action-btn.delete {
+		color: var(--danger);
+	}
 
 	.edit-name-container {
 		display: flex;
@@ -348,8 +366,16 @@
 		gap: 0.5rem;
 	}
 
-	.confirm-btn { background: var(--success) !important; color: white !important; flex: 1; }
-	.cancel-btn { background: #eee !important; color: #666 !important; flex: 1; }
+	.confirm-btn {
+		background: var(--success) !important;
+		color: white !important;
+		flex: 1;
+	}
+	.cancel-btn {
+		background: #eee !important;
+		color: #666 !important;
+		flex: 1;
+	}
 
 	.empty-state {
 		padding: 3rem 2rem;
@@ -357,4 +383,3 @@
 		color: var(--text-muted);
 	}
 </style>
-

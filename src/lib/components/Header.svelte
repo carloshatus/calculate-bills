@@ -31,11 +31,11 @@
 		<div class="header-left">
 			<slot name="title" />
 		</div>
-		
+
 		{#if $$slots.buttons}
 			<div class="menu-container noprint">
-				<button 
-					class="menu-toggle-btn" 
+				<button
+					class="menu-toggle-btn"
 					class:active={menuOpen}
 					on:click|stopPropagation={toggleMenu}
 					aria-label="Menu"
@@ -44,7 +44,13 @@
 				</button>
 
 				{#if menuOpen}
-					<div class="dropdown-menu shadow" on:click={closeMenu} on:keydown={() => {}}>
+					<div
+						class="dropdown-menu shadow"
+						on:click={closeMenu}
+						on:keydown={() => {
+							/* noop */
+						}}
+					>
 						<div class="menu-items">
 							<slot name="buttons" />
 						</div>
@@ -52,7 +58,6 @@
 				{/if}
 			</div>
 		{/if}
-
 	</div>
 </header>
 
@@ -125,8 +130,14 @@
 	}
 
 	@keyframes popIn {
-		from { opacity: 0; transform: scale(0.95) translateY(-10px); }
-		to { opacity: 1; transform: scale(1) translateY(0); }
+		from {
+			opacity: 0;
+			transform: scale(0.95) translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
 	}
 
 	.menu-items {
@@ -136,7 +147,8 @@
 	}
 
 	/* Menu Button Refinements */
-	:global(.dropdown-menu button), :global(.dropdown-menu .action-btn) {
+	:global(.dropdown-menu button),
+	:global(.dropdown-menu .action-btn) {
 		width: 100% !important;
 		justify-content: flex-start !important;
 		padding: 0.75rem 1rem !important;
@@ -159,5 +171,3 @@
 		text-overflow: ellipsis;
 	}
 </style>
-
-
