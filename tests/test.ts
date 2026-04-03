@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
 test('index page has expected title', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('./');
 	await page.waitForSelector('.main-content[data-ready="true"]');
 	await expect(page.getByRole('heading', { name: 'Calculadora' })).toBeVisible();
 });
 
 test('should calculate totals correctly', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('./');
 	await page.waitForSelector('.main-content[data-ready="true"]');
 	const inputs = page.locator('input[inputmode="numeric"]');
 	await inputs.first().click();
@@ -19,7 +19,7 @@ test('should calculate totals correctly', async ({ page }) => {
 });
 
 test('should add and clear observations', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('./');
 	await page.waitForSelector('.main-content[data-ready="true"]');
 	const obsInput = page.getByPlaceholder('Adicionar observação...');
 	await obsInput.fill('Test observation');
@@ -32,7 +32,7 @@ test('should add and clear observations', async ({ page }) => {
 });
 
 test('should navigate to trocar-notas page', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('./');
 	await page.waitForSelector('.main-content[data-ready="true"]');
 	await page.getByRole('button', { name: 'Menu' }).click();
 	await page.getByTitle('Trocar Notas').click();

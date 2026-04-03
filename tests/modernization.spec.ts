@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Modernization Features', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('/');
+		await page.goto('./');
 		// Esperar que o Svelte monte e hidrate o app
 		await page.waitForSelector('.main-content[data-ready="true"]');
 		await expect(page.getByRole('heading', { name: 'Calculadora' })).toBeVisible();
