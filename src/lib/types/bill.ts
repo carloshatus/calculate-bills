@@ -10,3 +10,12 @@ export type Bill = {
 	type: BillTypes;
 	originalQuantity?: number | null | string;
 };
+
+export type SavedCalculation = {
+	id: string;
+	name: string;
+	date: string;
+	bills: Bill[];
+	observations: string[];
+	total: number;
+};

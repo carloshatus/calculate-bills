@@ -9,8 +9,9 @@ Uma aplicação web simples e eficiente para auxiliar na contagem de dinheiro (c
 - **Observações**: Adicione notas ou observações à sua contagem.
 - **Calculadora de Troco**: Uma ferramenta para ajudar a determinar as notas necessárias para um determinado valor de troco, com base nas notas disponíveis.
 - **Persistência de Dados**: Suas contagens e observações são salvas no `localStorage` do seu navegador, para que você não perca seu trabalho ao recarregar a página.
-- **Compartilhamento**: Exporte e compartilhe sua contagem como uma imagem.
-- **Progressive Web App (PWA)**: Pode ser "instalado" em dispositivos móveis para uma experiência de aplicativo nativo.
+- **Histórico de Contagens**: Salve o estado atual da sua calculadora para consultar, restaurar ou gerenciar mais tarde.
+- **Compartilhamento**: Exporte e compartilhe sua contagem atual ou itens do histórico como uma imagem.
+- **Progressive Web App (PWA)**: Pode ser "instalado" em dispositivos móveis para uma experiêncian de aplicativo nativo.
 
 ## Páginas
 
@@ -30,6 +31,15 @@ Acessível através do ícone de troca na calculadora principal, esta página aj
 
 - Informe um valor para o qual você precisa dar troco.
 - A calculadora usará as notas e moedas (de R$20 para baixo) que você informou ter na página principal para sugerir a melhor combinação para o troco.
+
+### 3. Histórico
+
+Gerencie todas as suas contagens salvas.
+
+- **Lista de Contagens**: Visualize todas as contagens salvas anteriormente com nome, data e valor total.
+- **Visualizar e Compartilhar**: Abra uma contagem específica para ver os detalhes e gerar uma imagem para compartilhamento.
+- **Restaurar**: Carregue uma contagem antiga de volta na calculadora principal para continuar editando.
+- **Gerenciamento**: Exclua contagens que não são mais necessárias.
 
 ## Tecnologias Utilizadas
 

@@ -3,10 +3,10 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import { type Bill, BillTypes } from '$lib/types/bill';
+	import { type Bill, BillTypes, type SavedCalculation } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsCurrencyExchange, BsPlusCircleFill, BsPencil, BsSave } from 'svelte-icons-pack/bs';
-	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
+	import { BsCurrencyExchange, BsPlusCircleFill, BsPencil, BsSave, BsCardList } from 'svelte-icons-pack/bs';
+	import { BiSolidShareAlt, BiSolidCloudDownload } from 'svelte-icons-pack/bi';
 	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
 	import { share as shareImage } from '$lib/utils/share';
 	import { refreshTime } from '$lib/utils/time';
@@ -150,6 +150,22 @@
 			storage.save('observationsSaved', observations);
 		}
 	}
+
+	function saveCurrentCalculation(): void {
+		const history = storage.get<SavedCalculation[]>('history') || [];
+		const newCalculation: SavedCalculation = {
+			id: crypto.randomUUID(),
+			name: pageName || 'Sem título',
+			date: new Date().toISOString(),
+			bills: JSON.parse(JSON.stringify(bills)),
+			observations: [...observations],
+			total: total
+		};
+
+		history.unshift(newCalculation);
+		storage.save('history', history);
+		alert('Cálculo salvo com sucesso!');
+	}
 </script>
 
 <svelte:head>
@@ -190,6 +206,24 @@
 				}}
 			>
 				<Icon src={BsCurrencyExchange} />
+			</button>
+			<button
+				class="transparent noprint"
+				title="Salvar Cálculo"
+				on:click={() => {
+					saveCurrentCalculation();
+				}}
+			>
+				<Icon src={BiSolidCloudDownload} color="darkgreen" />
+			</button>
+			<button
+				class="transparent noprint"
+				title="Ver Histórico"
+				on:click={() => {
+					goto(`${base}/historico`);
+				}}
+			>
+				<Icon src={BsCardList} color="blue" />
 			</button>
 			<button
 				class="transparent noprint"
