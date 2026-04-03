@@ -1,28 +1,44 @@
 name: Deploy to GitHub Pages
 
-on: [push]
+on:
+  push:
+    branches: ["main"]
 
 jobs:
-  build_site:
+  validate_and_build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 18
-          cache: npm
+          node-version: 20
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm install
+        run: yarn install --frozen-lockfile
 
-      - name: build
+      - name: Static Analysis (Lint & Types)
+        run: |
+          yarn run check
+          yarn run lint
+
+      - name: Unit Tests
+        run: yarn run test:unit -- --run
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E Tests (Chromium)
+        run: npx playwright test --project=chromium
+
+      - name: Build site
         env:
           BASE_PATH: '/calculate-bills'
         run: |
-          npm run build
+          yarn run build
           touch build/.nojekyll
 
       - name: Upload Artifacts
@@ -31,17 +47,15 @@ jobs:
           path: 'build/'
 
   deploy:
-    needs: build_site
+    if: github.ref == 'refs/heads/main'
+    needs: validate_and_build
     runs-on: ubuntu-latest
-
     permissions:
       pages: write
       id-token: write
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy
         id: deployment
