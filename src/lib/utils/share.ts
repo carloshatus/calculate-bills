@@ -1,6 +1,10 @@
 import html2canvas from 'html2canvas';
 
-export async function share(mainContent: HTMLElement): Promise<void> {
+export async function share(
+	mainContent: HTMLElement,
+	title = 'Calculadora de Cédulas',
+	text = 'Confira o cálculo'
+): Promise<void> {
 	// PWA/Mobile experience: Add a tiny delay to ensure smooth transition
 	await new Promise((r) => setTimeout(r, 100));
 
@@ -19,8 +23,8 @@ export async function share(mainContent: HTMLElement): Promise<void> {
 			const file = new File([blob], 'calculadora-de-cedulas.png', { type: 'image/png' });
 			await navigator.share({
 				files: [file],
-				title: 'Calculadora de Cédulas',
-				text: 'Confira o cálculo'
+				title,
+				text
 			});
 		} else {
 			const a = document.createElement('a');

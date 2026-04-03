@@ -10,26 +10,26 @@ Esta versão passou por um **overhaul completo de UI/UX**, focando em usabilidad
 
 - 📱 **Mobile-First Real**: Layout otimizado para telas de celular, com botões táteis e áreas de toque ampliadas.
 - 🎨 **Design Moderno**: Interface limpa com uso de Glassmorphism, transições suaves e paleta de cores de alto contraste.
-- 🍔 **Menu Inteligente**: Sistema de menu lateral (hambúrguer) que organiza as ações e limpa a área de trabalho.
-- 🛡️ **Segurança Total (Save & Clear)**: Novo fluxo de trabalho que permite salvar a contagem atual antes de limpar a tela ou restaurar dados antigos.
-- 📦 **Componentes Premium**: Substituição de alertas nativos por **Modais Customizados** com feedback visual por cores.
+- 🍔 **Menu Inteligente**: Sistema de menu lateral organizado para maximizar a área de trabalho.
+- 🛡️ **Segurança de Dados Avançada**: Fluxo de "Save & Clear" e "Backup-before-Restore" que garante que você nunca perca uma contagem acidentalmente.
+- 📦 **Arquitetura Escalável**: Lógica de negócio centralizada em `Services` (History, Storage) para fácil manutenção.
+- 🎨 **Consistência Visual**: Padronização rigorosa de ícones e cores para ações globais (Restaurar, Limpar, Compartilhar).
 
 ## 🚀 Funcionalidades Principais
 
-- **Contagem em Tempo Real**: Insira quantidades e veja o total geral (e parciais) atualizar instantaneamente.
-- **Identificação por Nome**: Dê nomes personalizados às suas contagem diretamente no cabeçalho.
-- **Histórico Completo**: Salve, visualize, edite nomes e restaure contagens passadas com um toque.
-- **Calculadora de Troco**: Algoritmo que sugere a melhor combinação de notas/moedas com base no seu saldo atual de caixa.
-- **Observações Inteligentes**: Adicione notas rápidas que são salvas e exportadas junto com a contagem.
-- **Compartilhamento Visual**: Gere uma imagem profissional da sua contagem para enviar por WhatsApp ou E-mail.
-- **Modo Offline (PWA)**: Instale como um aplicativo no seu celular e use mesmo sem internet.
+- **Contagem em Tempo Real**: Insira quantidades e veja o total geral atualizar instantaneamente.
+- **Identificação Personalizada**: Gerencie múltiplos cálculos dando nomes a cada um.
+- **Histórico Inteligente**: Salve, pesquise, edite nomes e visualize detalhes de contagens passadas.
+- **Restauração Segura**: Recupere qualquer contagem do histórico com opção de backup automático da contagem atual.
+- **Compartilhamento Profissional**: Gere e compartilhe imagens de alta qualidade das suas contagens.
+- **Modo Offline (PWA)**: Totalmente funcional sem internet, com persistência local robusta.
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Framework**: [SvelteKit](https://kit.svelte.dev/) & [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
-- **Estilização**: CSS Puro (Design System baseado em variáveis HSL)
-- **Componentes**: Custom Svelte Components (Header, Modal, Totals, BillRow)
+- **Framework**: [SvelteKit](https://kit.svelte.dev/) (v1.20) & [TypeScript](https://www.typescriptlang.org/) (v5.1)
+- **Build Tool**: [Vite](https://vitejs.dev/) (v4.5)
+- **Estilização**: Design System Baseado em Variáveis HSL (Custom CSS)
+- **Segurança**: Dependências fixadas e auditadas para garantir estabilidade e proteção contra XSS.
 - **Ícones**: [Svelte Icons Pack](https://github.com/Cweili/svelte-icons-pack)
 - **Testes**: [Playwright](https://playwright.dev/) para E2E & [Vitest](https://vitest.dev/) para Unitários.
 

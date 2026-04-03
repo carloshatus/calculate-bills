@@ -114,16 +114,21 @@
 			<p class="dateStamp">{currentDate.split(' ')[1]}</p>
 		</div>
 
-		<slot slot="buttons">
+		<div slot="buttons">
 			<button
 				class="action-btn share"
 				title="Compartilhar"
-				on:click={() => shareImage(mainContent)}
+				on:click={() =>
+					shareImage(
+						mainContent,
+						'Sugestão de Troca de Notas',
+						`Confira esta sugestão de troca no valor de ${parseToCurrency(amount || 0)}`
+					)}
 			>
 				<Icon src={BiSolidShareAlt} />
 				<span>Compartilhar</span>
 			</button>
-		</slot>
+		</div>
 	</Header>
 
 	<div class="card exchange-input-section">

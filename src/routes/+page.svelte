@@ -317,7 +317,12 @@
 			<button
 				class="action-btn share"
 				title="Compartilhar"
-				on:click={() => shareImage(mainContent)}
+				on:click={() =>
+					shareImage(
+						mainContent,
+						pageName || 'Minha Contagem',
+						'Confira esta contagem de cédulas!'
+					)}
 			>
 				<Icon src={BiSolidShareAlt} />
 				<span>Compartilhar</span>

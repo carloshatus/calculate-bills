@@ -125,7 +125,12 @@
 				<button
 					class="action-btn share"
 					title="Compartilhar"
-					on:click={() => shareImage(mainContent)}
+					on:click={() =>
+						shareImage(
+							mainContent,
+							`Histórico: ${calculation?.name || 'Contagem'}`,
+							'Confira esta contagem salva no meu histórico!'
+						)}
 				>
 					<Icon src={BiSolidShareAlt} />
 					<span>Compartilhar</span>
