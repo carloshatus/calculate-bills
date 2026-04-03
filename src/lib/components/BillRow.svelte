@@ -11,25 +11,69 @@
 	export let originalQuantity: number | string | null = null;
 </script>
 
-<div class="container">
+<div class="card container bill-row">
 	{#if readonly}
-		<p class={`value ${bill.type}`}>
-			<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
-			{parseToCurrency(bill.value)}
-		</p>
-		<i class="bill-quantity">
-			{bill.quantity}
-			{#if originalQuantity}
-				/ {originalQuantity}
-			{/if}
-		</i>
-		<i class="total-label">{parseToCurrency(bill.total)}</i>
+		<div class="row-content">
+			<span class={`value ${bill.type}`}>
+				<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
+				{parseToCurrency(bill.value)}
+			</span>
+			<span class="bill-quantity">
+				{bill.quantity || 0}
+				{#if originalQuantity}
+					<small class="text-muted">/ {originalQuantity}</small>
+				{/if}
+			</span>
+			<span class="total-label">{parseToCurrency(bill.total)}</span>
+		</div>
 	{:else}
 		<label class={`value ${bill.type}`} for="bill-quantity-{index}">
 			<Icon src={bill.type === BillTypes.COIN ? BiCoin : FaSolidMoneyBill1Wave} />
 			{parseToCurrency(bill.value)}
 		</label>
-		<slot />
-		<label class="total-label" for="bill-quantity-{index}">{parseToCurrency(bill.total)}</label>
+		<div class="input-wrapper">
+			<slot />
+		</div>
+		<label class="total-label" for="bill-quantity-{index}">
+			{parseToCurrency(bill.total)}
+		</label>
 	{/if}
 </div>
+
+<style>
+	.bill-row {
+		margin-bottom: 0.5rem;
+		transition: transform 0.2s;
+	}
+
+	.bill-row:focus-within {
+		transform: translateY(-2px);
+		border-color: var(--primary);
+	}
+
+	.row-content {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		gap: 0.75rem;
+	}
+
+	.input-wrapper {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+	}
+
+	:global(.bill-quantity) {
+		text-align: center;
+		font-weight: 600;
+		font-size: 1.1rem;
+	}
+
+	.text-muted {
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		margin-left: 4px;
+	}
+</style>
+

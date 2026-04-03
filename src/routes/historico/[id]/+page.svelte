@@ -13,10 +13,31 @@
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 
 	const storage = new Storage(browser);
 	let calculation: SavedCalculation | null = null;
 	let mainContent: HTMLElement;
+
+	let modalConfig = {
+		show: false,
+		title: '',
+		message: '',
+		type: 'info' as 'info' | 'danger' | 'success',
+		confirmText: 'Confirmar',
+		onConfirm: () => {}
+	};
+
+	function openModal(config: Partial<typeof modalConfig>) {
+		modalConfig = {
+			...modalConfig,
+			show: true,
+			type: 'info',
+			confirmText: 'Confirmar',
+			onConfirm: () => {},
+			...config
+		};
+	}
 
 	onMount(() => {
 		const id = $page.params.id;
@@ -24,8 +45,12 @@
 		calculation = history.find((c) => c.id === id) || null;
 
 		if (!calculation) {
-			alert('Contagem não encontrada.');
-			goto(`${base}/historico`);
+			openModal({
+				title: 'Erro',
+				message: 'Contagem não encontrada no seu histórico.',
+				type: 'danger',
+				onConfirm: () => goto(`${base}/historico`)
+			});
 		}
 	});
 
@@ -42,86 +67,140 @@
 {#if calculation}
 <div class="main-content" bind:this={mainContent}>
 	<Header>
-		<div slot="title" class="container">
-			<button
-				class="transparent noprint"
-				title="Voltar"
-				on:click={() => {
-					goto(`${base}/historico`);
-				}}
-			>
-				<Icon src={BsArrowLeft} />
-			</button>
-			<h1>{calculation.name}</h1>
+		<div slot="title" class="title-container">
+			<div class="header-left">
+				<button
+					class="back-btn"
+					title="Voltar"
+					on:click={() => goto(`${base}/historico`)}
+				>
+					<Icon src={BsArrowLeft} />
+				</button>
+				<h1>{calculation.name}</h1>
+			</div>
+			<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
 		</div>
-		<div slot="buttons" class="container">
+		<slot slot="buttons">
 			<button
-				class="transparent noprint"
+				class="action-btn share"
 				title="Compartilhar"
-				on:click={() => {
-					shareImage(mainContent);
-				}}
+				on:click={() => shareImage(mainContent)}
 			>
-				<Icon src={BiSolidShareAlt} color="darkblue" />
+				<Icon src={BiSolidShareAlt} />
+				<span>Compartilhar</span>
 			</button>
-		</div>
+		</slot>
 	</Header>
 
-	<div class="info-container noprint">
-		<p><strong>Data:</strong> {new Date(calculation.date).toLocaleString('pt-BR')}</p>
+	<div class="bills-list">
+		{#each calculation.bills as bill, i}
+			{#if Number(bill.quantity) > 0}
+				<BillRow {bill} readonly={true} index={i} />
+			{/if}
+		{/each}
 	</div>
-
-	{#each calculation.bills as bill, i}
-		{#if Number(bill.quantity) > 0}
-			<BillRow {bill} readonly={true} index={i} />
-		{/if}
-	{/each}
 
 	<Totals total={calculation.total} {totalBills} {totalCoins} {totalQuantity} />
 
 	{#if calculation.observations.length > 0}
-		<div class="observations container">
-			{#each calculation.observations as observation, i}
-				<div class="side-button container">
-					<h2>{`${i + 1}. ${observation}`}</h2>
-				</div>
-			{/each}
+		<div class="card observations-section">
+			<div class="section-header">
+				<h2>Observações</h2>
+			</div>
+			<div class="obs-list">
+				{#each calculation.observations as obs, i}
+					<div class="obs-item">
+						<span class="obs-text">{obs}</span>
+					</div>
+				{/each}
+			</div>
 		</div>
 	{/if}
 
-	<div class="container onlyprint">
-		<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
-	</div>
+	<footer class="onlyprint footer-print">
+		<p>Contagem gerada em: {new Date(calculation.date).toLocaleString('pt-BR')}</p>
+	</footer>
+
+	<Modal
+		bind:show={modalConfig.show}
+		title={modalConfig.title}
+		message={modalConfig.message}
+		type={modalConfig.type}
+		confirmText={modalConfig.confirmText}
+		showCancel={false}
+		onConfirm={modalConfig.onConfirm}
+	/>
 </div>
 {:else}
-<div class="main-content">
-	<p>Carregando...</p>
+<div class="main-content loading-state">
+	<div class="loader"></div>
+	<p>Carregando contagem...</p>
 </div>
 {/if}
 
 <style>
-	.info-container {
-		padding: 0.5rem 1rem;
-		border-bottom: 1px solid #eee;
+	.title-container {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
+
+
+	.bills-list {
+		padding: var(--padding);
+	}
+
+	.observations-section {
+		margin: var(--padding);
+		padding: 1rem;
+	}
+
+	.section-header {
 		margin-bottom: 1rem;
 	}
-	
-	.info-container p {
-		margin: 0;
-		font-size: 0.9rem;
-		color: #666;
+
+	.obs-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 
-	@media print {
-		.noprint {
-			display: none;
-		}
-		.onlyprint {
-			display: block;
-		}
+	.obs-item {
+		padding: 0.75rem;
+		background: var(--bg);
+		border-radius: 8px;
+		font-size: 0.95rem;
 	}
 
-	.onlyprint {
-		display: none;
+	.loading-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 60vh;
+		color: var(--text-muted);
+	}
+
+	.loader {
+		width: 40px;
+		height: 40px;
+		border: 4px solid var(--border);
+		border-top-color: var(--primary);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: 1rem;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	.action-btn.share { color: #4f46e5; }
+
+	.footer-print {
+		padding: 2rem;
+		text-align: center;
+		border-top: 1px solid #eee;
+		margin-top: 2rem;
 	}
 </style>

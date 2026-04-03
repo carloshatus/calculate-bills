@@ -1,191 +1,257 @@
-/* ==========================================================================
-   Base & Layout
-   ========================================================================== */
+:root {
+	/* Palette */
+	--primary-hsl: 210, 100%, 50%;
+	--primary: hsl(var(--primary-hsl));
+	--primary-dark: hsl(210, 100%, 40%);
+	--primary-light: hsl(210, 100%, 95%);
 
-.main-content {
-	max-width: 1200px;
-	margin: 0 auto;
-}
+	--success: hsl(150, 80%, 40%);
+	--success-light: hsl(150, 80%, 95%);
+	--warning: hsl(40, 90%, 50%);
+	--danger: hsl(0, 80%, 60%);
+	--danger-light: hsl(0, 80%, 96%);
 
-.container {
-	font-family: sans-serif;
-	font-size: 0.8em;
-	display: flex;
-	flex-direction: row;
-	flex-flow: wrap;
-	justify-content: space-between;
-	align-content: space-between;
-	padding: 10px 50px;
-}
+	--bg: hsl(210, 20%, 98%);
+	--surface: #ffffff;
+	--text-main: hsl(210, 20%, 15%);
+	--text-muted: hsl(210, 10%, 45%);
+	--border: hsl(210, 20%, 90%);
+	--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-/* ==========================================================================
-   Header
-   ========================================================================== */
-
-header {
-	margin-bottom: 10px;
-}
-
-header .container {
-	padding: 0px;
-}
-
-header h1,
-.name-page {
-	font-family: sans-serif;
-	padding: 10px 0px;
-	font-size: 1.8em;
-}
-
-.name-page {
-	max-width: 70%;
+	/* Sizing */
+	--radius: 12px;
+	--padding: 1rem;
+	--header-height: 70px;
 }
 
 /* ==========================================================================
-   Components
+   Base & Reset
    ========================================================================== */
 
-/* Buttons & Icons
-   -------------------------------------------------------------------------- */
-button {
-	font-size: 1.4em;
+* {
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
 }
 
-
-botton button,
-header button {
-	font-size: 2.4em;
+body {
+	margin: 0;
+	padding: 0;
+	background-color: var(--bg);
+	color: var(--text-main);
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-size: 16px;
 }
 
-.side-button {
-	justify-content: flex-start;
-}
-
-svg {
-	padding: 2px;
-}
-
-/* Bill & Coin Items
-   -------------------------------------------------------------------------- */
-
-.value {
-	width: 30%;
-	max-width: 100px;
-}
-
-.coin {
-	color: darkgoldenrod;
-}
-
-.bill {
-	color: darkgreen;
-}
-
-.bill-quantity {
-	min-width: 40%;
-	width: auto;
-}
-
-/* Totals Section
-   -------------------------------------------------------------------------- */
-
-.total {
-	margin-top: 25px;
-	padding-right: 70px;
-}
-
-.total-label {
-	width: 25%;
-}
-
-.total>h1 {
-	font-family: sans-serif;
-	font-size: 1.6em;
-	margin-bottom: 15px;
-}
-
-.total>h1>i {
-	font-size: 0.7em;
-}
-
-.total>h2 {
-	font-family: sans-serif;
-	font-size: 1.2em;
-	margin-bottom: 15px;
-}
-
-/* Observations Section
-   -------------------------------------------------------------------------- */
-
-.observations {
-	justify-content: flex-start;
-}
-
-.observations h2 {
-	font-family: sans-serif;
-	font-size: 1.2em;
-}
-
-.observations>div {
-	flex-grow: 1;
-}
-
-.observation {
-	width: 90%;
-}
-
-.available-info {
-	padding: 0px 50px;
-	margin-top: -10px;
-	color: #666;
-	justify-content: flex-start;
-}
-
-.available-info p {
+p, h1, h2, h3 {
 	margin: 0;
 }
 
-
 /* ==========================================================================
-   Utility Classes
+   Layout
    ========================================================================== */
 
-.transparent {
-	border: none;
-	background-color: transparent;
+.main-content {
+	max-width: 600px;
+	margin: 0 auto;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	padding-bottom: 5rem; /* Space for FABs or totals */
 }
 
-.dateStamp {
-	color: darkgray;
+.container {
+	padding: var(--padding);
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+h1 {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+h2 {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+input[type="text"], 
+input[type="number"] {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	padding: 0.6rem 0.75rem;
+	font-size: 1rem;
+	color: var(--text-main);
+	transition: border-color 0.2s, box-shadow 0.2s;
+	width: 100%;
+}
+
+input:focus {
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+button {
+	cursor: pointer;
+	border: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	transition: transform 0.1s, opacity 0.2s;
+	padding: 0.5rem;
+	background: transparent;
+}
+
+button:active {
+	transform: scale(0.95);
+}
+
+button:hover {
+	opacity: 0.8;
+}
+
+/* ==========================================================================
+   App Components
+   ========================================================================== */
+
+.card {
+	background: var(--surface);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	margin-bottom: 0.75rem;
+	border: 1px solid var(--border);
+}
+
+/* Bill/Coin Styling */
+.value {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+	min-width: 100px;
+}
+
+.bill {
+	color: var(--success);
+}
+
+.coin {
+	color: var(--warning);
+}
+
+.total-label {
+	font-weight: 700;
+	text-align: right;
+	min-width: 90px;
+	color: var(--text-main);
+}
+
+.bill-quantity {
+	flex-grow: 1;
+	text-align: center;
+}
+
+/* Utility */
+.transparent {
+	background: transparent;
+}
+
+.noprint {
+	display: flex;
 }
 
 .onlyprint {
-	visibility: hidden;
+	display: none;
 }
 
+.dateStamp {
+	color: var(--text-muted);
+	font-size: 0.85rem;
+}
+
+.header-left {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.back-btn {
+	width: 38px;
+	height: 38px;
+	border-radius: 50% !important;
+	background: var(--bg) !important;
+	color: var(--text-main) !important;
+	font-size: 1.2rem !important;
+	transition: all 0.2s ease !important;
+	flex-shrink: 0;
+	border: 1px solid var(--border) !important;
+}
+
+.back-btn:hover {
+	background: var(--primary-light) !important;
+	color: var(--primary) !important;
+	border-color: var(--primary) !important;
+}
+
+.back-btn:active {
+	transform: scale(0.9) !important;
+}
 
 /* ==========================================================================
    Print Styles
    ========================================================================== */
 
 @media print {
-	input {
-		border: none;
-	}
-
 	.noprint {
-		display: none;
+		display: none !important;
 	}
 
 	.onlyprint {
-		visibility: visible;
+		display: block !important;
 	}
 
+	body {
+		background: white;
+		font-size: 12pt;
+	}
+
+	.main-content {
+		padding: 0;
+		max-width: none;
+	}
+
+	.card {
+		box-shadow: none;
+		border: 1px solid #eee;
+	}
+}
+
+/* Mobile-Specific Refinements */
+@media (max-width: 480px) {
+	:root {
+		--padding: 0.75rem;
+	}
+	
 	.container {
-		break-after: always;
-		/* for firefox */
-		page-break-after: always;
-		/* for webkit */
-		-webkit-column-break-after: always;
+		padding: 10px;
+	}
+	
+	.bill-quantity {
+		font-size: 1.1rem;
 	}
 }

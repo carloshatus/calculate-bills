@@ -8,12 +8,41 @@
 	import { BsArrowLeft, BsEye, BsTrash, BsPencil, BsCheckLg, BsXLg } from 'svelte-icons-pack/bs';
 	import { parseToCurrency } from '$lib/utils/currency';
 	import Header from '$lib/components/Header.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 
 	const storage = new Storage(browser);
 	let history: SavedCalculation[] = [];
 
 	if (browser) {
 		history = storage.get<SavedCalculation[]>('history') || [];
+	}
+
+	let modalConfig = {
+		show: false,
+		title: '',
+		message: '',
+		type: 'info' as 'info' | 'danger' | 'success',
+		confirmText: 'Confirmar',
+		cancelText: 'Cancelar',
+		extraActionText: '',
+		showCancel: true,
+		onConfirm: () => {},
+		onExtraAction: () => {}
+	};
+
+	function openModal(config: Partial<typeof modalConfig>) {
+		modalConfig = {
+			...modalConfig,
+			show: true,
+			showCancel: true,
+			type: 'info',
+			confirmText: 'Confirmar',
+			cancelText: 'Cancelar',
+			extraActionText: '',
+			onConfirm: () => {},
+			onExtraAction: () => {},
+			...config
+		};
 	}
 
 	let editingId: string | null = null;
@@ -35,22 +64,64 @@
 	}
 
 	function deleteCalculation(id: string) {
-		if (confirm('Tem certeza que deseja excluir esta contagem?')) {
-			history = history.filter((c) => c.id !== id);
-			storage.save('history', history);
-		}
+		openModal({
+			title: 'Excluir contagem?',
+			message: 'Tem certeza que deseja excluir esta contagem permanentemente?',
+			type: 'danger',
+			confirmText: 'Excluir',
+			onConfirm: () => {
+				history = history.filter((c) => c.id !== id);
+				storage.save('history', history);
+			}
+		});
 	}
 
 	function viewCalculation(id: string) {
 		goto(`${base}/historico/${id}`);
 	}
 
+	function saveCurrentAndRestore(calcToRestore: SavedCalculation) {
+		const currentBills = storage.get<any[]>('billsSaved') || [];
+		const currentObs = storage.get<string[]>('observationsSaved') || [];
+		const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
+		
+		const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
+
+		const backup: SavedCalculation = {
+			id: crypto.randomUUID(),
+			name: currentName,
+			date: new Date().toISOString(),
+			bills: currentBills,
+			observations: currentObs,
+			total: total
+		};
+
+		const updatedHistory = [backup, ...history];
+		storage.save('history', updatedHistory);
+		history = updatedHistory;
+
+		// Now restore
+		storage.save('billsSaved', calcToRestore.bills);
+		storage.save('observationsSaved', calcToRestore.observations);
+		storage.save('pageName', calcToRestore.name);
+		goto(`${base}/`);
+	}
+
 	function restoreCalculation(calc: SavedCalculation) {
-		if (confirm('Deseja restaurar esta contagem? Isso sobrescreverá a contagem atual.')) {
-			storage.save('billsSaved', calc.bills);
-			storage.save('observationsSaved', calc.observations);
-			goto(`${base}/`);
-		}
+		openModal({
+			title: 'Restaurar contagem?',
+			message: 'Deseja restaurar esta contagem? Isso sobrescreverá a contagem atual da calculadora.',
+			type: 'info',
+			confirmText: 'Restaurar sem salvar',
+			extraActionText: 'Salvar atual e Restaurar',
+			onConfirm: () => {
+				storage.save('billsSaved', calc.bills);
+				storage.save('observationsSaved', calc.observations);
+				storage.save('pageName', calc.name);
+				goto(`${base}/`);
+			},
+			onExtraAction: () => saveCurrentAndRestore(calc)
+		});
 	}
 
 	function formatDate(dateStr: string) {
@@ -64,28 +135,29 @@
 
 <div class="main-content">
 	<Header>
-		<div slot="title" class="container">
-			<button
-				class="transparent noprint"
-				title="Voltar"
-				on:click={() => {
-					goto(`${base}/`);
-				}}
-			>
-				<Icon src={BsArrowLeft} />
-			</button>
-			<h1>Histórico</h1>
+		<div slot="title" class="title-container">
+			<div class="header-left">
+				<button
+					class="back-btn"
+					title="Voltar"
+					on:click={() => goto(`${base}/`)}
+				>
+					<Icon src={BsArrowLeft} />
+				</button>
+				<h1>Histórico</h1>
+			</div>
+			<p class="dateStamp">{history.length} contagens salvas</p>
 		</div>
 	</Header>
 
 	<div class="history-list">
 		{#if history.length === 0}
-			<div class="container empty-msg">
+			<div class="empty-state card">
 				<p>Nenhuma contagem salva.</p>
 			</div>
 		{:else}
 			{#each history as calc}
-				<div class="history-item container">
+				<div class="card history-item">
 					<div class="history-info">
 						{#if editingId === calc.id}
 							<div class="edit-name-container">
@@ -94,149 +166,195 @@
 									bind:value={newName}
 									class="edit-name-input"
 									on:keydown={(e) => e.key === 'Enter' && saveName(calc.id)}
+									on:blur={() => saveName(calc.id)}
 								/>
-								<button
-									class="transparent icon-btn"
-									title="Confirmar"
-									on:click={() => saveName(calc.id)}
-								>
-									<Icon src={BsCheckLg} color="green" />
-								</button>
-								<button class="transparent icon-btn" title="Cancelar" on:click={cancelEdit}>
-									<Icon src={BsXLg} color="red" />
-								</button>
+								<div class="edit-actions">
+									<button class="confirm-btn" on:click={() => saveName(calc.id)}>
+										<Icon src={BsCheckLg} />
+									</button>
+									<button class="cancel-btn" on:click={cancelEdit}>
+										<Icon src={BsXLg} />
+									</button>
+								</div>
 							</div>
 						{:else}
-							<div class="title-container">
-								<h3>{calc.name}</h3>
-								<button
-									class="transparent icon-btn edit-btn"
-									title="Editar nome"
-									on:click={() => startEdit(calc)}
-								>
-									<Icon src={BsPencil} size="12" color="#666" />
+							<div class="title-row">
+								<button class="title-btn-list" on:click={() => startEdit(calc)} aria-label="Editar nome">
+									<h3>{calc.name}</h3>
+								</button>
+								<button class="edit-trigger" on:click={() => startEdit(calc)} aria-label="Editar nome">
+									<Icon src={BsPencil} />
 								</button>
 							</div>
 						{/if}
-						<p>{formatDate(calc.date)}</p>
-						<p class="total-text">{parseToCurrency(calc.total)}</p>
+						<div class="meta-row">
+							<span class="date">{formatDate(calc.date)}</span>
+							<span class="amount">{parseToCurrency(calc.total)}</span>
+						</div>
 					</div>
+					
 					<div class="history-actions">
 						<button
-							class="transparent icon-btn"
+							class="action-btn view"
 							title="Visualizar"
 							on:click={() => viewCalculation(calc.id)}
 						>
-							<Icon src={BsEye} color="blue" />
+							<Icon src={BsEye} />
 						</button>
 						<button
-							class="transparent icon-btn"
+							class="action-btn restore"
 							title="Restaurar"
 							on:click={() => restoreCalculation(calc)}
 						>
-							<Icon src={BsArrowLeft} color="green" />
+							<Icon src={BsArrowLeft} />
 						</button>
 						<button
-							class="transparent icon-btn"
+							class="action-btn delete"
 							title="Excluir"
 							on:click={() => deleteCalculation(calc.id)}
 						>
-							<Icon src={BsTrash} color="red" />
+							<Icon src={BsTrash} />
 						</button>
 					</div>
 				</div>
 			{/each}
 		{/if}
 	</div>
+
+	<Modal
+		bind:show={modalConfig.show}
+		title={modalConfig.title}
+		message={modalConfig.message}
+		type={modalConfig.type}
+		confirmText={modalConfig.confirmText}
+		cancelText={modalConfig.cancelText}
+		extraActionText={modalConfig.extraActionText}
+		showCancel={modalConfig.showCancel}
+		onConfirm={modalConfig.onConfirm}
+		onExtraAction={modalConfig.onExtraAction}
+	/>
 </div>
 
 <style>
-	.history-list {
+	.title-container {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		padding: 1rem;
+		flex: 1;
+	}
+
+	.title-btn-list {
+		background: transparent !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.title-btn-list:hover h3 {
+		color: var(--primary);
+	}
+
+
+	.history-list {
+		padding: var(--padding);
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 	}
 
 	.history-item {
-		background: #fff;
-		border-radius: 8px;
 		padding: 1rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.history-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.title-row h3 {
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--text-main);
+		margin: 0;
+	}
+
+	.edit-trigger {
+		opacity: 0.3;
+		padding: 4px;
+		font-size: 0.8rem;
+	}
+
+	.meta-row {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		border: 1px solid #eee;
+		align-items: baseline;
 	}
 
-	.history-info h3 {
-		margin: 0;
-		font-size: 1.1rem;
-		color: #333;
-	}
-
-	.history-info p {
-		margin: 0.2rem 0;
+	.date {
 		font-size: 0.85rem;
-		color: #666;
+		color: var(--text-muted);
 	}
 
-	.total-text {
-		font-weight: bold;
-		color: #000;
+	.amount {
+		font-weight: 700;
+		color: var(--primary);
+		font-size: 1.1rem;
 	}
 
 	.history-actions {
 		display: flex;
 		gap: 0.5rem;
+		border-top: 1px solid var(--border);
+		padding-top: 0.75rem;
+		justify-content: flex-end;
 	}
 
-	.icon-btn {
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem;
-		border-radius: 50%;
-		transition: background 0.2s;
+	.action-btn {
+		flex: 1;
+		max-width: 80px;
+		background: var(--bg) !important;
+		border-radius: 8px !important;
+		padding: 0.5rem !important;
+		font-size: 1.2rem !important;
 	}
 
-	.icon-btn:hover {
-		background: #f5f5f5;
-	}
-
-	.empty-msg {
-		text-align: center;
-		color: #888;
-		margin-top: 2rem;
-	}
-
-	.title-container {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.edit-btn {
-		padding: 0;
-		opacity: 0.5;
-	}
-
-	.edit-btn:hover {
-		opacity: 1;
-	}
+	.action-btn.view { color: var(--primary); }
+	.action-btn.restore { color: var(--success); }
+	.action-btn.delete { color: var(--danger); }
 
 	.edit-name-container {
 		display: flex;
-		align-items: center;
-		gap: 0.2rem;
+		flex-direction: column;
+		gap: 0.5rem;
+		width: 100%;
 	}
 
 	.edit-name-input {
-		font-size: 1rem;
-		padding: 2px 5px;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		width: 150px;
+		width: 100% !important;
+	}
+
+	.edit-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.confirm-btn { background: var(--success) !important; color: white !important; flex: 1; }
+	.cancel-btn { background: #eee !important; color: #666 !important; flex: 1; }
+
+	.empty-state {
+		padding: 3rem 2rem;
+		text-align: center;
+		color: var(--text-muted);
 	}
 </style>
+

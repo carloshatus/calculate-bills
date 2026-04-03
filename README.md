@@ -1,110 +1,70 @@
-# Calculadora de Cédulas
+# 💸 Calculadora de Cédulas & Moedas
 
-Uma aplicação web simples e eficiente para auxiliar na contagem de dinheiro (cédulas e moedas) e no cálculo de troco.
+Uma aplicação web premium, **mobile-first** e extremamente intuitiva, projetada para profissionais que precisam de agilidade e precisão na contagem de dinheiro, fechamento de caixa e cálculo de troco.
 
-## Funcionalidades
+👉 **[Acesse a Versão de Produção](https://carloshatus.github.io/calculate-bills)**
 
-- **Contagem de Cédulas e Moedas**: Insira a quantidade de cada cédula e moeda para obter o total.
-- **Cálculo em Tempo Real**: Os totais são atualizados automaticamente à medida que você digita.
-- **Observações**: Adicione notas ou observações à sua contagem.
-- **Calculadora de Troco**: Uma ferramenta para ajudar a determinar as notas necessárias para um determinado valor de troco, com base nas notas disponíveis.
-- **Persistência de Dados**: Suas contagens e observações são salvas no `localStorage` do seu navegador, para que você não perca seu trabalho ao recarregar a página.
-- **Histórico de Contagens**: Salve o estado atual da sua calculadora para consultar, restaurar ou gerenciar mais tarde.
-- **Compartilhamento**: Exporte e compartilhe sua contagem atual ou itens do histórico como uma imagem.
-- **Progressive Web App (PWA)**: Pode ser "instalado" em dispositivos móveis para uma experiêncian de aplicativo nativo.
+## ✨ Destaques da Nova Versão (v2.0)
 
-## Páginas
+Esta versão passou por um **overhaul completo de UI/UX**, focando em usabilidade com uma mão, estética moderna e segurança de dados.
 
-### 1. Calculadora Principal
+- 📱 **Mobile-First Real**: Layout otimizado para telas de celular, com botões táteis e áreas de toque ampliadas.
+- 🎨 **Design Moderno**: Interface limpa com uso de Glassmorphism, transições suaves e paleta de cores de alto contraste.
+- 🍔 **Menu Inteligente**: Sistema de menu lateral (hambúrguer) que organiza as ações e limpa a área de trabalho.
+- 🛡️ **Segurança Total (Save & Clear)**: Novo fluxo de trabalho que permite salvar a contagem atual antes de limpar a tela ou restaurar dados antigos.
+- 📦 **Componentes Premium**: Substituição de alertas nativos por **Modais Customizados** com feedback visual por cores.
 
-A página principal onde você pode realizar a contagem de cédulas e moedas.
+## 🚀 Funcionalidades Principais
 
-- Insira a quantidade de cada item.
-- As somas parciais e o total geral são calculados instantaneamente.
-- Adicione observações de texto livre.
-- Limpe todos os campos para recomeçar.
-- Dê um nome à sua contagem para fácil identificação ao compartilhar.
+- **Contagem em Tempo Real**: Insira quantidades e veja o total geral (e parciais) atualizar instantaneamente.
+- **Identificação por Nome**: Dê nomes personalizados às suas contagem diretamente no cabeçalho.
+- **Histórico Completo**: Salve, visualize, edite nomes e restaure contagens passadas com um toque.
+- **Calculadora de Troco**: Algoritmo que sugere a melhor combinação de notas/moedas com base no seu saldo atual de caixa.
+- **Observações Inteligentes**: Adicione notas rápidas que são salvas e exportadas junto com a contagem.
+- **Compartilhamento Visual**: Gere uma imagem profissional da sua contagem para enviar por WhatsApp ou E-mail.
+- **Modo Offline (PWA)**: Instale como um aplicativo no seu celular e use mesmo sem internet.
 
-### 2. Trocar Notas
+## 🛠️ Tecnologias Utilizadas
 
-Acessível através do ícone de troca na calculadora principal, esta página ajuda a calcular o troco.
+- **Framework**: [SvelteKit](https://kit.svelte.dev/) & [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Estilização**: CSS Puro (Design System baseado em variáveis HSL)
+- **Componentes**: Custom Svelte Components (Header, Modal, Totals, BillRow)
+- **Ícones**: [Svelte Icons Pack](https://github.com/Cweili/svelte-icons-pack)
+- **Testes**: [Playwright](https://playwright.dev/) para E2E & [Vitest](https://vitest.dev/) para Unitários.
 
-- Informe um valor para o qual você precisa dar troco.
-- A calculadora usará as notas e moedas (de R$20 para baixo) que você informou ter na página principal para sugerir a melhor combinação para o troco.
-
-### 3. Histórico
-
-Gerencie todas as suas contagens salvas.
-
-- **Lista de Contagens**: Visualize todas as contagens salvas anteriormente com nome, data e valor total.
-- **Visualizar e Compartilhar**: Abra uma contagem específica para ver os detalhes e gerar uma imagem para compartilhamento.
-- **Restaurar**: Carregue uma contagem antiga de volta na calculadora principal para continuar editando.
-- **Gerenciamento**: Exclua contagens que não são mais necessárias.
-
-## Tecnologias Utilizadas
-
-- [SvelteKit](https://kit.svelte.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Vite](https://vitejs.dev/)
-- [Svelte Icons Pack](https://github.com/Cweili/svelte-icons-pack)
-- CSS puro para estilização.
-- [Playwright](https://playwright.dev/) para testes End-to-End.
-
-## Como Executar o Projeto Localmente
+## 💻 Como Executar Localmente
 
 ### Pré-requisitos
+- Node.js (v18+)
+- npm ou yarn
 
-- [Node.js](https://nodejs.org/) (versão 16 ou superior)
-- [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
-
-### Instalação
-
-Clone o repositório e instale as dependências:
-
+### Instalação e Desenvolvimento
 ```bash
+# 1. Clone o projeto
 git clone https://github.com/seu-usuario/calculate-bills-v0.git
-cd calculate-bills-v0
+
+# 2. Instale as dependências
 npm install
-```
 
-### Desenvolvimento
-
-Inicie o servidor de desenvolvimento:
-
-```bash
+# 3. Inicie o servidor de desenvolvimento
 npm run dev
 ```
+Acesse `http://localhost:5173` no seu navegador.
 
-Abra seu navegador e acesse `http://localhost:5173` (ou a porta indicada no seu terminal).
+## 🧪 Qualidade do Código
 
-## Executando Testes
+O projeto conta com uma cobertura rigorosa de testes para garantir que os cálculos e a persistência funcionem sempre:
 
-O projeto inclui testes end-to-end (E2E) com Playwright e testes de unidade com Vitest.
+- **E2E**: `npm test` (Executa fluxos completos de usuário)
+- **Unitários**: `npm run test:unit` (Valida lógica de moedas e tempo)
 
-### Testes End-to-End (E2E)
-
-Para executar os testes E2E com Playwright:
-
-```bash
-npm test
-```
-
-### Testes de Unidade
-
-Para executar os testes de unidade com Vitest:
-
-```bash
-npm run test:unit
-```
-
-## Build para Produção
-
-Para criar uma versão otimizada para produção:
+## 📦 Build para Produção
 
 ```bash
 npm run build
+npm run preview
 ```
 
-Você pode visualizar o build de produção com `npm run preview`.
-
-> Para fazer o deploy da sua aplicação, você pode precisar instalar um [adapter](https://kit.svelte.dev/docs/adapters) para o seu ambiente de destino.
+---
+*Desenvolvido por [Carlos Hatus](https://carloshatus.github.io/) com foco em velocidade, precisão e experiência do usuário.*

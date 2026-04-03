@@ -5,7 +5,14 @@
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes, type SavedCalculation } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsCurrencyExchange, BsPlusCircleFill, BsPencil, BsSave, BsCardList } from 'svelte-icons-pack/bs';
+	import {
+		BsCurrencyExchange,
+		BsPlusCircleFill,
+		BsCardList,
+		BsCheckLg,
+		BsXLg,
+		BsInfoCircleFill
+	} from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt, BiSolidCloudDownload } from 'svelte-icons-pack/bi';
 	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
 	import { share as shareImage } from '$lib/utils/share';
@@ -13,6 +20,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 
 	const storage = new Storage(browser);
 
@@ -22,8 +30,41 @@
 	let currentDate: string = refreshTime();
 	let mainContent: HTMLElement;
 
+	let modalConfig = {
+		show: false,
+		title: '',
+		message: '',
+		type: 'info' as 'info' | 'danger' | 'success',
+		confirmText: 'Confirmar',
+		cancelText: 'Cancelar',
+		extraActionText: '',
+		linkText: '',
+		linkUrl: '',
+		showCancel: true,
+		onConfirm: () => {},
+		onExtraAction: () => {}
+	};
+
+	function openModal(config: Partial<typeof modalConfig>) {
+		modalConfig = {
+			...modalConfig,
+			show: true,
+			showCancel: true,
+			type: 'info',
+			confirmText: 'Confirmar',
+			cancelText: 'Cancelar',
+			extraActionText: '',
+			linkText: '',
+			linkUrl: '',
+			onConfirm: () => {},
+			onExtraAction: () => {},
+			...config
+		};
+	}
+
 	let edit = false;
 	let pageName = '';
+	let tempName = '';
 
 	let inputs: HTMLInputElement[] = [];
 	let pageNameInput: HTMLInputElement;
@@ -45,17 +86,50 @@
 	function start(): void {
 		const billsFound = storage.get<Bill[]>('billsSaved');
 		const observationsFound = storage.get<string[]>('observationsSaved');
+		const pageNameFound = storage.get<string>('pageName');
 		if (billsFound) {
 			bills = billsFound;
 		}
 		if (observationsFound) {
 			observations = observationsFound;
 		}
-		storage.save('bills', bills);
-		storage.save('observations', observations);
+		if (pageNameFound) {
+			pageName = pageNameFound;
+		}
 		if (!bills.length) {
 			reset();
 		}
+	}
+
+	function handleReset(): void {
+		openModal({
+			title: 'Limpar tudo?',
+			message: 'Deseja salvar esta contagem no histórico antes de limpar tudo?',
+			type: 'danger',
+			confirmText: 'Limpar sem salvar',
+			cancelText: 'Cancelar',
+			extraActionText: 'Salvar e Limpar',
+			onConfirm: reset,
+			onExtraAction: saveAndReset
+		});
+	}
+
+	function handleAbout(): void {
+		openModal({
+			title: 'Sobre o Aplicativo',
+			message:
+				'Calculadora de Cédulas v2.0\n\nDesenvolvido com SvelteKit por Carlos Hatus. Uma ferramenta rápida, segura e profissional para gerenciamento de contagens físicas.',
+			type: 'info',
+			confirmText: 'Entendido',
+			showCancel: false,
+			linkText: 'Ver outros projetos',
+			linkUrl: 'https://carloshatus.github.io/'
+		});
+	}
+
+	function saveAndReset(): void {
+		saveCurrentCalculation(true);
+		reset();
 	}
 
 	function reset(): void {
@@ -75,8 +149,10 @@
 			{ value: 0.01, quantity: null, total: 0, type: BillTypes.COIN }
 		];
 		observations = [];
+		pageName = '';
 		storage.save('billsSaved', bills);
 		storage.save('observationsSaved', observations);
+		storage.delete('pageName');
 
 		storage.delete('amountSaved');
 	}
@@ -127,12 +203,21 @@
 	}
 
 	function changeEdit(): void {
-		edit = !edit;
-		if (edit) {
-			setTimeout(() => {
-				pageNameInput.focus();
-			}, 100);
-		}
+		tempName = pageName;
+		edit = true;
+		setTimeout(() => {
+			pageNameInput.focus();
+		}, 100);
+	}
+
+	function confirmEdit(): void {
+		pageName = tempName;
+		edit = false;
+		storage.save('pageName', pageName);
+	}
+
+	function cancelEdit(): void {
+		edit = false;
 	}
 
 	function addObs(): void {
@@ -151,7 +236,7 @@
 		}
 	}
 
-	function saveCurrentCalculation(): void {
+	function saveCurrentCalculation(silent = false): void {
 		const history = storage.get<SavedCalculation[]>('history') || [];
 		const newCalculation: SavedCalculation = {
 			id: crypto.randomUUID(),
@@ -164,7 +249,16 @@
 
 		history.unshift(newCalculation);
 		storage.save('history', history);
-		alert('Cálculo salvo com sucesso!');
+
+		if (!silent) {
+			openModal({
+				title: 'Salvo!',
+				message: 'Cálculo salvo no seu histórico com sucesso.',
+				type: 'success',
+				showCancel: false,
+				confirmText: 'Entendido'
+			});
+		}
 	}
 </script>
 
@@ -174,126 +268,338 @@
 
 <div class="main-content" bind:this={mainContent}>
 	<Header>
-		<div slot="title" class="container">
-			<button
-				class="transparent noprint"
-				title="Editar nome"
-				on:click={() => {
-					changeEdit();
-				}}
-			>
-				<Icon src={edit ? BsSave : BsPencil} />
-			</button>
+		<div slot="title" class="title-container" class:editing={edit}>
 			{#if edit}
+				<div class="edit-title-group">
+					<input
+						type="text"
+						class="page-title-input"
+						placeholder="Nome do cálculo"
+						bind:value={tempName}
+						bind:this={pageNameInput}
+						on:keydown={(e) => e.key === 'Enter' && confirmEdit()}
+					/>
+					<div class="edit-title-actions">
+						<button class="confirm-btn-title" on:click={confirmEdit} aria-label="Confirmar">
+							<Icon src={BsCheckLg} />
+						</button>
+						<button class="cancel-btn-title" on:click={cancelEdit} aria-label="Cancelar">
+							<Icon src={BsXLg} />
+						</button>
+					</div>
+				</div>
+			{:else}
+				<button class="title-btn" on:click={changeEdit} aria-label="Editar nome">
+					<h1>{pageName || 'Calculadora'}</h1>
+				</button>
+			{/if}
+			<p class="dateStamp">{currentDate.split(' ')[1]}</p>
+		</div>
+		<slot slot="buttons">
+			<button class="action-btn" title="Trocar Notas" on:click={() => goto(`${base}/trocar-notas`)}>
+				<Icon src={BsCurrencyExchange} />
+				<span>Trocar Notas</span>
+			</button>
+			<button
+				class="action-btn save"
+				title="Salvar Cálculo"
+				on:click={() => saveCurrentCalculation()}
+			>
+				<Icon src={BiSolidCloudDownload} />
+				<span>Salvar Cálculo</span>
+			</button>
+			<button
+				class="action-btn history"
+				title="Ver Histórico"
+				on:click={() => goto(`${base}/historico`)}
+			>
+				<Icon src={BsCardList} />
+				<span>Ver Histórico</span>
+			</button>
+			<button
+				class="action-btn share"
+				title="Compartilhar"
+				on:click={() => shareImage(mainContent)}
+			>
+				<Icon src={BiSolidShareAlt} />
+				<span>Compartilhar</span>
+			</button>
+			<button class="action-btn" title="Sobre" on:click={handleAbout}>
+				<Icon src={BsInfoCircleFill} />
+				<span>Sobre</span>
+			</button>
+			<div class="menu-separator" />
+			<button class="action-btn reset" title="Limpar tudo" on:click={handleReset}>
+				<Icon src={AiOutlineClear} />
+				<span>Limpar Tudo</span>
+			</button>
+		</slot>
+	</Header>
+
+	<div class="bills-list">
+		{#each bills as bill, i}
+			<BillRow {bill} index={i}>
 				<input
 					type="text"
-					class="name-page"
-					name="name-page"
-					placeholder={pageName}
-					bind:value={pageName}
-					bind:this={pageNameInput}
+					inputmode="numeric"
+					name="bill-quantity"
+					id={`bill-quantity-${i}`}
+					class="bill-quantity-input"
+					placeholder="0"
+					bind:value={bill.quantity}
+					bind:this={inputs[i]}
+					on:input={() => updateBills()}
+					on:keydown={(e) => goToNext(e, i)}
 				/>
-			{:else}
-				<h1>{pageName || 'Calculadora de cédulas'}</h1>
-			{/if}
-		</div>
-		<div slot="buttons" class="container">
-			<button
-				class="transparent noprint"
-				title="Trocar Notas"
-				on:click={() => {
-					goto(`${base}/trocar-notas`);
-				}}
-			>
-				<Icon src={BsCurrencyExchange} />
-			</button>
-			<button
-				class="transparent noprint"
-				title="Salvar Cálculo"
-				on:click={() => {
-					saveCurrentCalculation();
-				}}
-			>
-				<Icon src={BiSolidCloudDownload} color="darkgreen" />
-			</button>
-			<button
-				class="transparent noprint"
-				title="Ver Histórico"
-				on:click={() => {
-					goto(`${base}/historico`);
-				}}
-			>
-				<Icon src={BsCardList} color="blue" />
-			</button>
-			<button
-				class="transparent noprint"
-				title="Compartilhar"
-				on:click={() => {
-					shareImage(mainContent);
-				}}
-			>
-				<Icon src={BiSolidShareAlt} color="darkblue" />
-			</button>
-		</div>
-	</Header>
-	{#each bills as bill, i}
-		<BillRow {bill} index={i}>
-			<input
-				type="text"
-				inputmode="numeric"
-				name="bill-quantity"
-				id={`bill-quantity-${i}`}
-				class="bill-quantity"
-				placeholder="0"
-				bind:value={bill.quantity}
-				bind:this={inputs[i]}
-				on:keyup={() => updateBills()}
-				on:change={() => updateBills()}
-				on:keydown={(e) => goToNext(e, i)}
-			/>
-		</BillRow>
-	{/each}
-	<Totals {total} {totalBills} {totalCoins} {totalQuantity} />
-	<div class="observations container">
-		{#each observations as observation, i}
-			<div class="side-button container">
-				<button
-					class="transparent noprint"
-					title="Limpar"
-					on:click={() => {
-						clear(i);
-					}}
-				>
-					<Icon src={AiOutlineDelete} />
-				</button>
-				<h2>{`${i + 1}. ${observation}`}</h2>
-			</div>
+			</BillRow>
 		{/each}
 	</div>
-	<div class="container">
-		<input
-			type="text"
-			name="obs"
-			id="obs"
-			class="noprint observation"
-			placeholder="Observação"
-			bind:value={observation}
-			on:keydown={(e) => goToConfirm(e)}
-		/>
-		<button class="transparent noprint" title="Adicionar" on:click={() => addObs()}>
-			<Icon src={BsPlusCircleFill} />
-		</button>
+
+	<Totals {total} {totalBills} {totalCoins} {totalQuantity} />
+
+	<div class="card observations-section noprint">
+		<div class="section-header">
+			<h2>Observações</h2>
+		</div>
+
+		<div class="obs-input-group">
+			<input
+				type="text"
+				placeholder="Adicionar observação..."
+				bind:value={observation}
+				on:keydown={(e) => goToConfirm(e)}
+			/>
+			<button class="add-obs-btn" on:click={addObs}>
+				<Icon src={BsPlusCircleFill} />
+			</button>
+		</div>
+
+		{#if observations.length > 0}
+			<div class="obs-list">
+				{#each observations as obs, i}
+					<div class="obs-item">
+						<span class="obs-text">{obs}</span>
+						<button class="delete-obs" on:click={() => clear(i)}>
+							<Icon src={AiOutlineDelete} />
+						</button>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</div>
-	<botton class="container">
-		<p class="dateStamp">{currentDate}</p>
-		<button
-			class="transparent noprint"
-			title="Limpar"
-			on:click={() => {
-				reset();
-			}}
-		>
-			<Icon src={AiOutlineClear} color="darkred" />
-		</button>
-	</botton>
+
+	<footer class="onlyprint footer-print">
+		<p>Gerado em: {currentDate}</p>
+	</footer>
+
+	<Modal
+		bind:show={modalConfig.show}
+		title={modalConfig.title}
+		message={modalConfig.message}
+		type={modalConfig.type}
+		confirmText={modalConfig.confirmText}
+		cancelText={modalConfig.cancelText}
+		extraActionText={modalConfig.extraActionText}
+		linkText={modalConfig.linkText}
+		linkUrl={modalConfig.linkUrl}
+		showCancel={modalConfig.showCancel}
+		onConfirm={modalConfig.onConfirm}
+		onExtraAction={modalConfig.onExtraAction}
+	/>
 </div>
+
+<style>
+	.title-btn {
+		background: transparent !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		text-align: left;
+		cursor: pointer;
+		display: block;
+		width: fit-content;
+	}
+
+	.title-btn:hover h1 {
+		color: var(--primary);
+	}
+
+	.title-container {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
+
+	.edit-title-group {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+	}
+
+	.edit-title-actions {
+		display: flex;
+		gap: 0.25rem;
+	}
+
+	.confirm-btn-title {
+		background: var(--success) !important;
+		color: white !important;
+		width: 32px;
+		height: 32px;
+		border-radius: 8px !important;
+		font-size: 0.9rem !important;
+	}
+
+	.cancel-btn-title {
+		background: var(--border) !important;
+		color: var(--text-muted) !important;
+		width: 32px;
+		height: 32px;
+		border-radius: 8px !important;
+		font-size: 0.9rem !important;
+	}
+
+	.page-title-input {
+		font-size: 1.1rem !important;
+		font-weight: 700 !important;
+		padding: 0.4rem 0.6rem !important;
+		border: 1px solid var(--primary) !important;
+		background: var(--primary-light) !important;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.bills-list {
+		padding: var(--padding);
+	}
+
+	.bill-quantity-input {
+		text-align: center;
+		font-weight: 700;
+		font-size: 1.2rem !important;
+		width: 80px !important;
+		padding: 0.4rem !important;
+		border: 2px solid var(--border) !important;
+	}
+
+	.bill-quantity-input:focus {
+		border-color: var(--primary) !important;
+		background: var(--primary-light) !important;
+	}
+
+	.observations-section {
+		margin: var(--padding);
+		padding: 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		background: var(--surface);
+	}
+
+	.section-header h2 {
+		font-size: 1.1rem;
+		color: var(--text-main);
+		font-weight: 700;
+	}
+
+	.obs-input-group {
+		display: flex;
+		gap: 0.5rem;
+		width: 100%;
+	}
+
+	.obs-input-group input {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.add-obs-btn {
+		background: var(--primary) !important;
+		color: white !important;
+		padding: 0 1rem !important;
+		height: 46px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.25rem !important;
+	}
+
+	.obs-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		width: 100%;
+	}
+
+	.obs-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.85rem 1rem;
+		background: var(--bg);
+		border-radius: 10px;
+		font-size: 0.95rem;
+		border: 1px solid var(--border);
+		animation: slideIn 0.2s ease-out;
+	}
+
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateY(5px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.obs-text {
+		flex: 1;
+		color: var(--text-main);
+		word-break: break-all;
+	}
+
+	.delete-obs {
+		color: var(--danger);
+		padding: 8px;
+		background: var(--danger-light) !important;
+		border-radius: 6px;
+		margin-left: 0.75rem;
+	}
+
+	.action-btn.save {
+		color: var(--success);
+	}
+	.action-btn.history {
+		color: #2563eb;
+	}
+	.action-btn.share {
+		color: #4f46e5;
+	}
+	.action-btn.reset {
+		color: var(--danger);
+	}
+
+	.footer-print {
+		padding: 2rem;
+		text-align: center;
+		border-top: 1px solid #eee;
+		margin-top: 2rem;
+	}
+
+	.menu-separator {
+		height: 1px;
+		background-color: var(--border);
+		margin: 0.5rem 0;
+		width: 100%;
+	}
+
+	@media (max-width: 480px) {
+		.bill-quantity-input {
+			width: 60px !important;
+			font-size: 1.1rem !important;
+		}
+	}
+</style>

@@ -16,9 +16,9 @@ export default defineConfig({
 				short_name: 'BillCalc',
 				description: 'A simple bill calculator app.',
 				start_url: '/calculate-bills',
-				display: 'standalone',
-				background_color: '#ffffff',
-				theme_color: '#000000',
+				display: 'fullscreen',
+				background_color: '#f8faff',
+				theme_color: '#0070f3',
 				icons: [
 					{
 						src: 'pwa-192x192.png',
