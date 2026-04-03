@@ -1,5 +1,5 @@
 import type Storage from './storageService';
-import { type Bill, type SavedCalculation } from '../types/bill';
+import type { Bill, SavedCalculation } from '../types/bill';
 
 export function getHistory(storage: Storage): SavedCalculation[] {
 	return storage.get<SavedCalculation[]>('history') || [];
