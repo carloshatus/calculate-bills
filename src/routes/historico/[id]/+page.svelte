@@ -5,10 +5,9 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Storage from '$lib/services/storageService';
-	import { BillTypes } from '$lib/types/bill';
-	import type { SavedCalculation } from '$lib/types/bill';
+	import { BillTypes, type SavedCalculation, type Bill } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsArrowLeft } from 'svelte-icons-pack/bs';
+	import { BsArrowLeft, BsArrowCounterclockwise } from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
 	import { share as shareImage } from '$lib/utils/share';
 	import Header from '$lib/components/Header.svelte';
@@ -26,7 +25,13 @@
 		message: '',
 		type: 'info' as 'info' | 'danger' | 'success',
 		confirmText: 'Confirmar',
+		cancelText: 'Cancelar',
+		showCancel: true,
+		extraActionText: '',
 		onConfirm: () => {
+			/* noop */
+		},
+		onExtraAction: () => {
 			/* noop */
 		}
 	};
@@ -59,6 +64,54 @@
 		}
 	});
 
+	function saveCurrentAndRestore(calcToRestore: SavedCalculation) {
+		const currentBills = storage.get<Bill[]>('billsSaved') || [];
+		const currentObs = storage.get<string[]>('observationsSaved') || [];
+		const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
+
+		const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
+
+		const backup: SavedCalculation = {
+			id: crypto.randomUUID(),
+			name: currentName,
+			date: new Date().toISOString(),
+			bills: currentBills,
+			observations: currentObs,
+			total: total
+		};
+
+		const history = storage.get<SavedCalculation[]>('history') || [];
+		const updatedHistory = [backup, ...history];
+		storage.save('history', updatedHistory);
+
+		// Now restore
+		storage.save('billsSaved', calcToRestore.bills);
+		storage.save('observationsSaved', calcToRestore.observations);
+		storage.save('pageName', calcToRestore.name);
+		goto(`${base}/`);
+	}
+
+	function restoreCalculation() {
+		if (!calculation) return;
+		const calc = calculation;
+
+		openModal({
+			title: 'Restaurar contagem?',
+			message:
+				'Deseja restaurar esta contagem? Isso sobrescreverá a contagem atual da calculadora.',
+			type: 'info',
+			confirmText: 'Restaurar sem salvar',
+			extraActionText: 'Salvar atual e Restaurar',
+			onConfirm: () => {
+				storage.save('billsSaved', calc.bills);
+				storage.save('observationsSaved', calc.observations);
+				storage.save('pageName', calc.name);
+				goto(`${base}/`);
+			},
+			onExtraAction: () => saveCurrentAndRestore(calc)
+		});
+	}
+
 	$: totalBills =
 		calculation?.bills.reduce(
 			(sum, { type, total }) => (sum += type === BillTypes.BILL ? total : 0),
@@ -89,7 +142,15 @@
 				</div>
 				<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
 			</div>
-			<slot slot="buttons">
+			<div slot="buttons">
+				<button
+					class="action-btn restore"
+					title="Restaurar"
+					on:click={restoreCalculation}
+				>
+					<Icon src={BsArrowCounterclockwise} />
+					<span>Restaurar</span>
+				</button>
 				<button
 					class="action-btn share"
 					title="Compartilhar"
@@ -98,7 +159,7 @@
 					<Icon src={BiSolidShareAlt} />
 					<span>Compartilhar</span>
 				</button>
-			</slot>
+			</div>
 		</Header>
 
 		<div class="bills-list">
@@ -136,8 +197,11 @@
 			message={modalConfig.message}
 			type={modalConfig.type}
 			confirmText={modalConfig.confirmText}
-			showCancel={false}
+			cancelText={modalConfig.cancelText}
+			extraActionText={modalConfig.extraActionText}
+			showCancel={modalConfig.showCancel}
 			onConfirm={modalConfig.onConfirm}
+			onExtraAction={modalConfig.onExtraAction}
 		/>
 	</div>
 {:else}
@@ -207,6 +271,10 @@
 
 	.action-btn.share {
 		color: #4f46e5;
+	}
+
+	.action-btn.restore {
+		color: var(--success);
 	}
 
 	.footer-print {

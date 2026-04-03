@@ -5,7 +5,7 @@
 	import Storage from '$lib/services/storageService';
 	import type { SavedCalculation, Bill } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsArrowLeft, BsEye, BsTrash, BsPencil, BsCheckLg, BsXLg } from 'svelte-icons-pack/bs';
+	import { BsArrowLeft, BsEye, BsTrash, BsPencil, BsCheckLg, BsXLg, BsArrowCounterclockwise } from 'svelte-icons-pack/bs';
 	import { parseToCurrency } from '$lib/utils/currency';
 	import Header from '$lib/components/Header.svelte';
 	import Modal from '$lib/components/Modal.svelte';
@@ -84,6 +84,20 @@
 		});
 	}
 
+	function clearHistory() {
+		openModal({
+			title: 'Limpar histórico?',
+			message:
+				'Tem certeza que deseja apagar todas as contagens salvas? Esta ação não pode ser desfeita.',
+			type: 'danger',
+			confirmText: 'Limpar tudo',
+			onConfirm: () => {
+				history = [];
+				storage.save('history', []);
+			}
+		});
+	}
+
 	function viewCalculation(id: string) {
 		goto(`${base}/historico/${id}`);
 	}
@@ -153,6 +167,15 @@
 			</div>
 			<p class="dateStamp">{history.length} contagens salvas</p>
 		</div>
+
+		<div slot="buttons">
+			{#if history.length > 0}
+				<button class="action-btn delete-all" title="Limpar Histórico" on:click={clearHistory}>
+					<Icon src={BsTrash} />
+					<span>Limpar</span>
+				</button>
+			{/if}
+		</div>
 	</Header>
 
 	<div class="history-list">
@@ -219,7 +242,7 @@
 							title="Restaurar"
 							on:click={() => restoreCalculation(calc)}
 						>
-							<Icon src={BsArrowLeft} />
+							<Icon src={BsArrowCounterclockwise} />
 						</button>
 						<button
 							class="action-btn delete"
@@ -346,8 +369,23 @@
 	.action-btn.restore {
 		color: var(--success);
 	}
-	.action-btn.delete {
+	.action-btn.delete,
+	.action-btn.delete-all {
 		color: var(--danger);
+	}
+
+	.action-btn.delete-all {
+		background: var(--danger-light) !important;
+		border: 1px solid var(--danger) !important;
+		padding: 0.4rem 0.8rem !important;
+		font-size: 0.9rem !important;
+		max-width: none;
+		height: 38px;
+	}
+
+	.action-btn.delete-all span {
+		margin-left: 0.4rem;
+		font-weight: 600;
 	}
 
 	.edit-name-container {
