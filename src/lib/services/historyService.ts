@@ -16,7 +16,9 @@ export function createSavedCalculation(
 	observations: string[],
 	name: string,
 	total: number,
-	createdAt: string
+	createdAt: string,
+	exchangeAmount?: number | null,
+	exchangeRest?: number | null
 ): SavedCalculation {
 	return {
 		id: crypto.randomUUID(),
@@ -25,7 +27,9 @@ export function createSavedCalculation(
 		createdAt: createdAt || new Date().toISOString(),
 		bills: JSON.parse(JSON.stringify(bills)),
 		observations: [...observations],
-		total: total
+		total: total,
+		exchangeAmount: exchangeAmount || null,
+		exchangeRest: exchangeRest || null
 	};
 }
 
@@ -34,9 +38,11 @@ export function saveCurrentAndRestore(storage: Storage, calcToRestore: SavedCalc
 	const currentObs = storage.get<string[]>('observationsSaved') || [];
 	const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
 	const createdAt = storage.get<string>('createdAt') || new Date().toISOString();
+	const exchangeAmount = storage.get<number>('amountSaved') || null;
+	const exchangeRest = storage.get<number>('exchangeRest') || null;
 	const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
 
-	const backup = createSavedCalculation(currentBills, currentObs, currentName, total, createdAt);
+	const backup = createSavedCalculation(currentBills, currentObs, currentName, total, createdAt, exchangeAmount, exchangeRest);
 	saveToHistory(storage, backup);
 
 	// Restore
@@ -47,6 +53,16 @@ export function restore(storage: Storage, calc: SavedCalculation): void {
 	storage.save('billsSaved', calc.bills);
 	storage.save('observationsSaved', calc.observations);
 	storage.save('pageName', calc.name);
+	if (calc.exchangeAmount) {
+		storage.save('amountSaved', calc.exchangeAmount);
+	} else {
+		storage.delete('amountSaved');
+	}
+	if (calc.exchangeRest !== undefined && calc.exchangeRest !== null) {
+		storage.save('exchangeRest', calc.exchangeRest);
+	} else {
+		storage.delete('exchangeRest');
+	}
 	if (calc.createdAt) {
 		storage.save('createdAt', calc.createdAt);
 	} else {

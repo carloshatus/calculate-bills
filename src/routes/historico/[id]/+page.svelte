@@ -12,6 +12,7 @@
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
 	import { share as shareImage, download as downloadImage } from '$lib/utils/share';
 	import { formatDate } from '$lib/utils/time';
+	import { parseToCurrency } from '$lib/utils/currency';
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
@@ -166,6 +167,26 @@
 
 		<Totals total={calculation.total} {totalBills} {totalCoins} {totalQuantity} />
 
+		{#if calculation.exchangeAmount}
+			<div class="card exchange-section">
+				<div class="section-header">
+					<h2>Troca Registrada</h2>
+				</div>
+				<div class="exchange-info-container">
+					<div class="exchange-info">
+						<span class="info-label">Valor solicitado:</span>
+						<span class="amount-value">{parseToCurrency(calculation.exchangeAmount)}</span>
+					</div>
+					{#if calculation.exchangeRest !== undefined && calculation.exchangeRest !== null}
+						<div class="exchange-info rest-info">
+							<span class="info-label">Sobra (resto):</span>
+							<span class="amount-value rest-value">{parseToCurrency(calculation.exchangeRest)}</span>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
 		{#if calculation.observations.length > 0}
 			<div class="card observations-section">
 				<div class="section-header">
@@ -223,13 +244,53 @@
 		padding: var(--padding);
 	}
 
-	.observations-section {
+	.observations-section,
+	.exchange-section {
 		margin: var(--padding);
 		padding: 1rem;
 	}
 
 	.section-header {
 		margin-bottom: 1rem;
+	}
+
+	.exchange-info-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.exchange-info {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem;
+		background: var(--bg);
+		border-radius: 8px;
+	}
+
+	.rest-info {
+		background: var(--warning-light, #fff3cd);
+		border: 1px solid var(--warning, #ffc107);
+	}
+
+	.exchange-info .info-label {
+		color: var(--text-muted);
+		font-weight: 600;
+	}
+
+	.exchange-info .amount-value {
+		font-weight: 700;
+		color: var(--primary);
+		font-size: 1.1rem;
+	}
+
+	.rest-info .info-label {
+		color: #856404;
+	}
+
+	.rest-info .rest-value {
+		color: #856404;
 	}
 
 	.obs-list {

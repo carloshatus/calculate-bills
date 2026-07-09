@@ -19,4 +19,6 @@ export type SavedCalculation = {
 	bills: Bill[];
 	observations: string[];
 	total: number;
+	exchangeAmount?: number | null;
+	exchangeRest?: number | null;
 };

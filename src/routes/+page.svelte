@@ -252,7 +252,9 @@
 
 	function saveCurrentCalculation(silent = false): void {
 		const createdAt = storage.get<string>('createdAt') || new Date().toISOString();
-		const newCalc = historyService.createSavedCalculation(bills, observations, pageName, total, createdAt);
+		const exchangeAmount = storage.get<number>('amountSaved') || null;
+		const exchangeRest = storage.get<number>('exchangeRest') || null;
+		const newCalc = historyService.createSavedCalculation(bills, observations, pageName, total, createdAt, exchangeAmount, exchangeRest);
 		historyService.saveToHistory(storage, newCalc);
 
 		if (!silent) {

@@ -87,6 +87,8 @@
 				);
 			}
 		}
+		
+		storage.save('exchangeRest', rest);
 	}
 
 	function enterAction(e: KeyboardEvent): void {
@@ -150,7 +152,10 @@
 						inputmode="decimal"
 						placeholder="0,00"
 						bind:value={amount}
-						on:change={() => storage.save('amountSaved', amount)}
+						on:change={() => {
+							storage.save('amountSaved', amount);
+							if (!amount) storage.delete('exchangeRest');
+						}}
 						on:keydown={(e) => enterAction(e)}
 					/>
 					<button class="primary-btn" on:click={exchange}>Trocar</button>
