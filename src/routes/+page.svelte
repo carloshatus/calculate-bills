@@ -13,7 +13,8 @@
 		BsCheckLg,
 		BsXLg,
 		BsInfoCircleFill,
-		BsDownload
+		BsDownload,
+		BsQrCode
 	} from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt, BiSolidCloudDownload } from 'svelte-icons-pack/bi';
 	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
@@ -23,6 +24,7 @@
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import QRShareModal from '$lib/components/QRShareModal.svelte';
 	import { onMount } from 'svelte';
 
 	const storage = new Storage(browser);
@@ -73,6 +75,8 @@
 			...config
 		};
 	}
+
+	let showQRModal = false;
 
 	let edit = false;
 	let pageName = '';
@@ -250,14 +254,14 @@
 		storage.save('observationsSaved', observations);
 	}
 
-	function saveCurrentCalculation(silent = false): void {
+	function saveCurrentCalculation(silent = false, customName?: string): void {
 		const createdAt = storage.get<string>('createdAt') || new Date().toISOString();
 		const exchangeAmount = storage.get<number>('amountSaved') || null;
 		const exchangeRest = storage.get<number>('exchangeRest') || null;
 		const newCalc = historyService.createSavedCalculation(
 			bills,
 			observations,
-			pageName,
+			customName ?? pageName,
 			total,
 			createdAt,
 			exchangeAmount,
@@ -274,6 +278,29 @@
 				confirmText: 'Entendido'
 			});
 		}
+	}
+
+	function handleQRMerge(
+		mergedBills: Bill[],
+		mergedObservations: string[],
+		backupName: string
+	): void {
+		// Save current calculation as backup before applying merge
+		saveCurrentCalculation(true, backupName);
+
+		// Apply merged data
+		bills = mergedBills;
+		observations = mergedObservations;
+		storage.save('billsSaved', bills);
+		storage.save('observationsSaved', observations);
+
+		openModal({
+			title: '✅ Merge realizado!',
+			message: `Os dados foram mesclados com sucesso. O cálculo anterior foi salvo no histórico como "${backupName}".`,
+			type: 'success',
+			showCancel: false,
+			confirmText: 'Entendido'
+		});
 	}
 </script>
 
@@ -344,6 +371,15 @@
 			>
 				<Icon src={BiSolidShareAlt} />
 				<span>Compartilhar</span>
+			</button>
+			<button
+				class="action-btn qrcode"
+				title="QR Code"
+				id="btn-qr-share"
+				on:click={() => (showQRModal = true)}
+			>
+				<Icon src={BsQrCode} />
+				<span>QR Code</span>
 			</button>
 			<button
 				class="action-btn download"
@@ -439,6 +475,7 @@
 		onConfirm={modalConfig.onConfirm}
 		onExtraAction={modalConfig.onExtraAction}
 	/>
+	<QRShareModal bind:show={showQRModal} {bills} {pageName} {observations} onMerge={handleQRMerge} />
 </div>
 
 <style>
@@ -610,6 +647,9 @@
 	}
 	.action-btn.share {
 		color: #4f46e5;
+	}
+	.action-btn.qrcode {
+		color: #0891b2;
 	}
 	.action-btn.reset {
 		color: var(--danger);
