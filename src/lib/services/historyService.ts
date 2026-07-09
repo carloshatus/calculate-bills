@@ -15,12 +15,14 @@ export function createSavedCalculation(
 	bills: Bill[],
 	observations: string[],
 	name: string,
-	total: number
+	total: number,
+	createdAt: string
 ): SavedCalculation {
 	return {
 		id: crypto.randomUUID(),
 		name: name || 'Sem título',
 		date: new Date().toISOString(),
+		createdAt: createdAt || new Date().toISOString(),
 		bills: JSON.parse(JSON.stringify(bills)),
 		observations: [...observations],
 		total: total
@@ -31,9 +33,10 @@ export function saveCurrentAndRestore(storage: Storage, calcToRestore: SavedCalc
 	const currentBills = storage.get<Bill[]>('billsSaved') || [];
 	const currentObs = storage.get<string[]>('observationsSaved') || [];
 	const currentName = storage.get<string>('pageName') || 'Sem título (backup)';
+	const createdAt = storage.get<string>('createdAt') || new Date().toISOString();
 	const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
 
-	const backup = createSavedCalculation(currentBills, currentObs, currentName, total);
+	const backup = createSavedCalculation(currentBills, currentObs, currentName, total, createdAt);
 	saveToHistory(storage, backup);
 
 	// Restore
@@ -44,6 +47,12 @@ export function restore(storage: Storage, calc: SavedCalculation): void {
 	storage.save('billsSaved', calc.bills);
 	storage.save('observationsSaved', calc.observations);
 	storage.save('pageName', calc.name);
+	if (calc.createdAt) {
+		storage.save('createdAt', calc.createdAt);
+	} else {
+		// Fallback for older saved calculations
+		storage.save('createdAt', calc.date);
+	}
 }
 
 export function deleteFromHistory(storage: Storage, id: string): SavedCalculation[] {

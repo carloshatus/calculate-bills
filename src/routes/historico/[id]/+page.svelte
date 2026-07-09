@@ -8,9 +8,10 @@
 	import * as historyService from '$lib/services/historyService';
 	import { BillTypes, type SavedCalculation } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsArrowLeft, BsArrowCounterclockwise } from 'svelte-icons-pack/bs';
+	import { BsArrowLeft, BsArrowCounterclockwise, BsDownload } from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
-	import { share as shareImage } from '$lib/utils/share';
+	import { share as shareImage, download as downloadImage } from '$lib/utils/share';
+	import { formatDate } from '$lib/utils/time';
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
 	import Totals from '$lib/components/Totals.svelte';
@@ -115,7 +116,12 @@
 					</button>
 					<h1>{calculation.name}</h1>
 				</div>
-				<p class="dateStamp">{new Date(calculation.date).toLocaleString('pt-BR')}</p>
+				<div class="dates-container">
+					{#if calculation.createdAt}
+						<p class="dateStamp">Criado: {formatDate(calculation.createdAt)}</p>
+					{/if}
+					<p class="dateStamp">Salvo: {formatDate(calculation.date)}</p>
+				</div>
 			</div>
 			<div slot="buttons">
 				<button class="action-btn restore" title="Restaurar" on:click={restoreCalculation}>
@@ -134,6 +140,18 @@
 				>
 					<Icon src={BiSolidShareAlt} />
 					<span>Compartilhar</span>
+				</button>
+				<button
+					class="action-btn download"
+					title="Baixar Imagem"
+					on:click={() =>
+						downloadImage(
+							mainContent,
+							(calculation?.name ? calculation.name.replace(/\s+/g, '-').toLowerCase() : 'contagem') + '.png'
+						)}
+				>
+					<Icon src={BsDownload} />
+					<span>Baixar Imagem</span>
 				</button>
 			</div>
 		</Header>
@@ -192,6 +210,13 @@
 		display: flex;
 		flex-direction: column;
 		flex: 1;
+	}
+
+	.dates-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		margin-top: 0.2rem;
 	}
 
 	.bills-list {

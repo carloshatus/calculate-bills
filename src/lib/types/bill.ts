@@ -15,6 +15,7 @@ export type SavedCalculation = {
 	id: string;
 	name: string;
 	date: string;
+	createdAt?: string;
 	bills: Bill[];
 	observations: string[];
 	total: number;

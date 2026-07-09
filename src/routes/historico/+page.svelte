@@ -202,7 +202,12 @@
 							</div>
 						{/if}
 						<div class="meta-row">
-							<span class="date">{formatDate(calc.date)}</span>
+							<div class="dates-column">
+								{#if calc.createdAt}
+									<span class="date">Criado em {formatDate(calc.createdAt)}</span>
+								{/if}
+								<span class="date">Salvo em {formatDate(calc.date)}</span>
+							</div>
 							<span class="amount">{parseToCurrency(calc.total)}</span>
 						</div>
 					</div>
@@ -310,11 +315,17 @@
 	.meta-row {
 		display: flex;
 		justify-content: space-between;
-		align-items: baseline;
+		align-items: center;
+	}
+
+	.dates-column {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
 	}
 
 	.date {
-		font-size: 0.85rem;
+		font-size: 0.8rem;
 		color: var(--text-muted);
 	}
 

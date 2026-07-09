@@ -103,6 +103,8 @@
 		const billsFound = storage.get<Bill[]>('billsSaved');
 		const observationsFound = storage.get<string[]>('observationsSaved');
 		const pageNameFound = storage.get<string>('pageName');
+		const createdAtFound = storage.get<string>('createdAt');
+		
 		if (billsFound) {
 			bills = billsFound;
 		}
@@ -111,6 +113,9 @@
 		}
 		if (pageNameFound) {
 			pageName = pageNameFound;
+		}
+		if (!createdAtFound) {
+			storage.save('createdAt', new Date().toISOString());
 		}
 		if (!bills.length) {
 			reset();
@@ -168,6 +173,7 @@
 		pageName = '';
 		storage.save('billsSaved', bills);
 		storage.save('observationsSaved', observations);
+		storage.save('createdAt', new Date().toISOString());
 		storage.delete('pageName');
 		storage.delete('amountSaved');
 	}
@@ -245,7 +251,8 @@
 	}
 
 	function saveCurrentCalculation(silent = false): void {
-		const newCalc = historyService.createSavedCalculation(bills, observations, pageName, total);
+		const createdAt = storage.get<string>('createdAt') || new Date().toISOString();
+		const newCalc = historyService.createSavedCalculation(bills, observations, pageName, total, createdAt);
 		historyService.saveToHistory(storage, newCalc);
 
 		if (!silent) {
