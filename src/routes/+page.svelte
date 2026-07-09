@@ -12,11 +12,12 @@
 		BsCardList,
 		BsCheckLg,
 		BsXLg,
-		BsInfoCircleFill
+		BsInfoCircleFill,
+		BsDownload
 	} from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt, BiSolidCloudDownload } from 'svelte-icons-pack/bi';
 	import { AiOutlineClear, AiOutlineDelete } from 'svelte-icons-pack/ai';
-	import { share as shareImage } from '$lib/utils/share';
+	import { share as shareImage, download as downloadImage } from '$lib/utils/share';
 	import { refreshTime } from '$lib/utils/time';
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
@@ -326,6 +327,18 @@
 			>
 				<Icon src={BiSolidShareAlt} />
 				<span>Compartilhar</span>
+			</button>
+			<button
+				class="action-btn download"
+				title="Baixar Imagem"
+				on:click={() =>
+					downloadImage(
+						mainContent,
+						(pageName ? pageName.replace(/\s+/g, '-').toLowerCase() : 'contagem') + '.png'
+					)}
+			>
+				<Icon src={BsDownload} />
+				<span>Baixar Imagem</span>
 			</button>
 			<button class="action-btn" title="Sobre" on:click={handleAbout}>
 				<Icon src={BsInfoCircleFill} />

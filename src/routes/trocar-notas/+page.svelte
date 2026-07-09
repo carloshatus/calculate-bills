@@ -5,9 +5,9 @@
 	import Storage from '$lib/services/storageService';
 	import { type Bill, BillTypes } from '$lib/types/bill';
 	import { Icon } from 'svelte-icons-pack';
-	import { BsArrowLeft } from 'svelte-icons-pack/bs';
+	import { BsArrowLeft, BsDownload } from 'svelte-icons-pack/bs';
 	import { BiSolidShareAlt } from 'svelte-icons-pack/bi';
-	import { share as shareImage } from '$lib/utils/share';
+	import { share as shareImage, download as downloadImage } from '$lib/utils/share';
 	import { refreshTime } from '$lib/utils/time';
 	import Header from '$lib/components/Header.svelte';
 	import BillRow from '$lib/components/BillRow.svelte';
@@ -127,6 +127,14 @@
 			>
 				<Icon src={BiSolidShareAlt} />
 				<span>Compartilhar</span>
+			</button>
+			<button
+				class="action-btn download"
+				title="Baixar Imagem"
+				on:click={() => downloadImage(mainContent, 'sugestao-troca-notas.png')}
+			>
+				<Icon src={BsDownload} />
+				<span>Baixar Imagem</span>
 			</button>
 		</div>
 	</Header>
