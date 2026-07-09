@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Moedas IA | TFJS Local</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border-radius: 99px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+        .status-active .status-dot {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .viewport-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 4/3;
+            margin: 0 auto 2rem;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #000;
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .total-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 1.5rem 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: inline-block;
+        }
+
+        .total-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        #total-display {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        #count-display {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .instructions {
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        /* Loading UI */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(99, 102, 241, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <p id="loader-text">Carregando TensorFlow.js...</p>
+    </div>
+
+    <div class="container">
+        <header>
+            <div id="status-badge" class="status-badge">
+                <div class="status-dot"></div>
+                Aguardando Modelo Local
+            </div>
+            <h1>Visão Local (TFJS)</h1>
+            <p style="color: var(--text-muted)">POC: Rodando modelo exportado via TensorFlow.js</p>
+        </header>
+
+        <div class="viewport-wrapper">
+            <video id="webcam" autoplay playsinline muted></video>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="total-card">
+            <p class="total-label">Soma Atual (Modelo TFJS)</p>
+            <h2 id="total-display">R$ 0,00</h2>
+            <p id="count-display">0 moedas detectadas</p>
+        </div>
+
+        <p class="instructions">
+            Este arquivo está preparado para carregar um modelo <b>model.json</b> exportado.<br>
+            Aponte o caminho do seu modelo no script abaixo para começar a detectar.
+        </p>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DO SEU MODELO TFJS ---
+        const MODEL_CONFIG = {
+            modelUrl: 'models/model.json', // Caminho atualizado
+            // Com base no shape [1, 12, 8400], sugerimos 8 classes. 
+            // Ajuste os nomes abaixo na ordem correta do seu treinamento:
+            labels: ["5c", "10c", "25c", "50c", "1r", "classe5", "classe6", "classe7"],
+            threshold: 0.45,
+            inputSize: 640
+        };
+
+        const valoresMoedas = {
+            "5c": 0.05, "10c": 0.10, "25c": 0.25, "50c": 0.50, "1r": 1.00,
+            "5": 0.05, "10": 0.10, "25": 0.25, "50": 0.50, "100": 1.00
+        };
+        // ---------------------------------------
+
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const totalDisplay = document.getElementById('total-display');
+        const countDisplay = document.getElementById('count-display');
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loader-text');
+        const statusBadge = document.getElementById('status-badge');
+
+        let model;
+
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        width: { ideal: 640 }, 
+                        height: { ideal: 640 }, // Quadrado para facilitar o match com 640x640 do modelo
+                        facingMode: "environment"
+                    }
+                });
+                video.srcObject = stream;
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        resolve();
+                    };
+                });
+            } catch (err) {
+                alert("Erro ao acessar câmera: " + err.message);
+            }
+        }
+
+        async function loadModel() {
+            loaderText.innerText = "Carregando modelo local...";
+            try {
+                model = await tf.loadGraphModel(MODEL_CONFIG.modelUrl);
+                
+                // Warmup
+                const dummyInput = tf.zeros([1, 640, 640, 3]);
+                const result = model.execute(dummyInput);
+                tf.dispose([dummyInput, result]);
+                
+                loader.classList.add('hidden');
+                statusBadge.classList.add('status-active');
+                statusBadge.innerHTML = '<div class="status-dot"></div>IA Local Pronta';
+            } catch (err) {
+                console.error(err);
+                loaderText.innerHTML = `<span style="color: #ef4444">Erro ao carregar modelo em: <br><i>${MODEL_CONFIG.modelUrl}</i></span>`;
+            }
+        }
+
+        async function runInference() {
+            if (!model) return;
+
+            const predictions = tf.tidy(() => {
+                const img = tf.browser.fromPixels(video);
+                const input = img.resizeNearestNeighbor([640, 640])
+                    .toFloat()
+                    .div(255.0)
+                    .expandDims(0);
+                
+                // Executa o modelo (YOLOv8 costuma retornar [1, 12, 8400])
+                const res = model.execute(input);
+                
+                // Transposição para [8400, 12] para facilitar colheita de dados
+                return res.transpose([0, 2, 1]).squeeze();
+            });
+
+            const data = await predictions.array();
+            await processYOLO(data);
+            
+            predictions.dispose();
+            requestAnimationFrame(runInference);
+        }
+
+        async function processYOLO(data) {
+            const boxes = [];
+            const scores = [];
+            const classes = [];
+            
+            const numClasses = MODEL_CONFIG.labels.length;
+
+            // Percorre as 8400 âncoras
+            for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+                // Nas primeiras 4 posições temos: center_x, center_y, width, height
+                // Da 5ª em diante temos as pontuações das classes
+                const classScores = row.slice(4);
+                const maxScore = Math.max(...classScores);
+
+                if (maxScore > MODEL_CONFIG.threshold) {
+                    const classId = classScores.indexOf(maxScore);
+                    
+                    // Converte de center_x, center_y, w, h para x1, y1, x2, y2
+                    const [cx, cy, w, h] = row.slice(0, 4);
+                    const x1 = cx - w / 2;
+                    const y1 = cy - h / 2;
+                    
+                    boxes.push([y1, x1, y1 + h, x1 + w]); // Formato TF: [y1, x1, y2, x2]
+                    scores.push(maxScore);
+                    classes.push(classId);
+                }
+            }
+
+            if (boxes.length > 0) {
+                const nmsIndices = await tf.image.nonMaxSuppressionAsync(
+                    tf.tensor2d(boxes),
+                    tf.tensor1d(scores),
+                    100, // Aumentado de 20 para 100 detecções simultâneas
+                    0.5, // iou threshold
+                    MODEL_CONFIG.threshold // score threshold
+                );
+
+                const finalIndices = await nmsIndices.array();
+                const finalDetections = finalIndices.map(idx => ({
+                    box: boxes[idx],
+                    score: scores[idx],
+                    class: MODEL_CONFIG.labels[classes[idx]]
+                }));
+
+                drawDetections(finalDetections);
+                
+                // Limpeza NMS
+                nmsIndices.dispose();
+            } else {
+                drawDetections([]);
+            }
+        }
+
+        function drawDetections(detections) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let soma = 0;
+            let count = 0;
+
+            detections.forEach(det => {
+                const [y1, x1, y2, x2] = det.box;
+                
+                // Escala de volta para o tamanho do canvas (640 -> canvas.width)
+                const startX = x1 * (canvas.width / 640);
+                const startY = y1 * (canvas.height / 640);
+                const width = (x2 - x1) * (canvas.width / 640);
+                const height = (y2 - y1) * (canvas.height / 640);
+
+                // Desenha Box
+                ctx.strokeStyle = "#22c55e";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(startX, startY, width, height);
+
+                // Label
+                ctx.fillStyle = "#22c55e";
+                ctx.font = "16px Outfit";
+                ctx.fillText(`${det.class} (${(det.score * 100).toFixed(0)}%)`, startX, startY > 20 ? startY - 10 : 20);
+
+                // Soma
+                const valor = valoresMoedas[det.class];
+                if (valor) {
+                    soma += valor;
+                    count++;
+                }
+            });
+
+            updateUI(soma, count);
+        }
+
+        // Função de utilidade para atualizar a UI (mesma lógica do teste anterior)
+        function updateUI(soma, quantidade) {
+            totalDisplay.innerText = `R$ ${soma.toFixed(2).replace('.', ',')}`;
+            countDisplay.innerText = `${quantidade} moedas detectadas`;
+        }
+
+        async function init() {
+            await setupCamera();
+            await loadModel();
+            runInference();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
