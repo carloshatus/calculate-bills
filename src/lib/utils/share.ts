@@ -40,7 +40,7 @@ function formatFilename(base: string): string {
 	const hours = String(now.getHours()).padStart(2, '0');
 	const mins = String(now.getMinutes()).padStart(2, '0');
 	const dateStr = `${day}-${month}-${year}_${hours}h${mins}`;
-	
+
 	if (base.endsWith('.png')) {
 		return base.replace('.png', `_${dateStr}.png`);
 	}

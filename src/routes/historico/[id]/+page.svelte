@@ -148,7 +148,9 @@
 					on:click={() =>
 						downloadImage(
 							mainContent,
-							(calculation?.name ? calculation.name.replace(/\s+/g, '-').toLowerCase() : 'contagem') + '.png'
+							(calculation?.name
+								? calculation.name.replace(/\s+/g, '-').toLowerCase()
+								: 'contagem') + '.png'
 						)}
 				>
 					<Icon src={BsDownload} />
@@ -180,7 +182,9 @@
 					{#if calculation.exchangeRest !== undefined && calculation.exchangeRest !== null}
 						<div class="exchange-info rest-info">
 							<span class="info-label">Sobra (resto):</span>
-							<span class="amount-value rest-value">{parseToCurrency(calculation.exchangeRest)}</span>
+							<span class="amount-value rest-value"
+								>{parseToCurrency(calculation.exchangeRest)}</span
+							>
 						</div>
 					{/if}
 				</div>

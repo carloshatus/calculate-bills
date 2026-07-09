@@ -87,7 +87,7 @@
 				);
 			}
 		}
-		
+
 		storage.save('exchangeRest', rest);
 	}
 

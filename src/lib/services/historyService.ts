@@ -42,7 +42,15 @@ export function saveCurrentAndRestore(storage: Storage, calcToRestore: SavedCalc
 	const exchangeRest = storage.get<number>('exchangeRest') || null;
 	const total = currentBills.reduce((sum, b) => sum + (b.total || 0), 0);
 
-	const backup = createSavedCalculation(currentBills, currentObs, currentName, total, createdAt, exchangeAmount, exchangeRest);
+	const backup = createSavedCalculation(
+		currentBills,
+		currentObs,
+		currentName,
+		total,
+		createdAt,
+		exchangeAmount,
+		exchangeRest
+	);
 	saveToHistory(storage, backup);
 
 	// Restore

@@ -104,7 +104,7 @@
 		const observationsFound = storage.get<string[]>('observationsSaved');
 		const pageNameFound = storage.get<string>('pageName');
 		const createdAtFound = storage.get<string>('createdAt');
-		
+
 		if (billsFound) {
 			bills = billsFound;
 		}
@@ -254,7 +254,15 @@
 		const createdAt = storage.get<string>('createdAt') || new Date().toISOString();
 		const exchangeAmount = storage.get<number>('amountSaved') || null;
 		const exchangeRest = storage.get<number>('exchangeRest') || null;
-		const newCalc = historyService.createSavedCalculation(bills, observations, pageName, total, createdAt, exchangeAmount, exchangeRest);
+		const newCalc = historyService.createSavedCalculation(
+			bills,
+			observations,
+			pageName,
+			total,
+			createdAt,
+			exchangeAmount,
+			exchangeRest
+		);
 		historyService.saveToHistory(storage, newCalc);
 
 		if (!silent) {
