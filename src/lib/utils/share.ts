@@ -13,7 +13,22 @@ export async function share(
 		scale: 2, // High resolution
 		backgroundColor: '#ffffff', // Clean white background for sharing
 		logging: false,
-		useCORS: true
+		useCORS: true,
+		onclone: (clonedDoc) => {
+			const style = clonedDoc.createElement('style');
+			let cssText = '';
+			for (const sheet of Array.from(document.styleSheets)) {
+				try {
+					for (const rule of Array.from(sheet.cssRules || [])) {
+						cssText += rule.cssText;
+					}
+				} catch (e) {
+					// Ignore cross-origin stylesheet errors
+				}
+			}
+			style.appendChild(clonedDoc.createTextNode(cssText));
+			clonedDoc.head.appendChild(style);
+		}
 	});
 	canvas.toBlob(async (blob) => {
 		if (!blob) {
